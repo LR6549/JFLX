@@ -1,0 +1,8 @@
+@PACKAGE_INIT@
+
+# JFLXLIBS package configuration — brings in the exported targets.
+# SDL3 link directories are embedded in the exported target (machine-specific
+# roots are provided by buildConfig.cmake, same convention as the build).
+include("${CMAKE_CURRENT_LIST_DIR}/JFLXLIBSTargets.cmake")
+
+check_required_components(JFLXLIBS)

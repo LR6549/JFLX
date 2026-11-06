@@ -1,0 +1,11 @@
+# Build output
+build/
+build-debug/
+cmake-build-*/
+
+# IDE / editor
+.idea/
+
+# OS junk
+*.user
+.DS_Store
