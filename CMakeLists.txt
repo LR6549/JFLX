@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(JFLXLIBS VERSION 1.0.0 LANGUAGES CXX)
+project(JFLXLIBS VERSION 1.0.1 LANGUAGES CXX)
 
 # ════════════════════════════════════════════════════════════════════════════
 # Global build configuration — single source of truth for every JFLXLIBS
@@ -40,7 +40,8 @@ target_compile_features(jflx_common INTERFACE cxx_std_20)
 target_compile_definitions(jflx_common INTERFACE SDL_STATIC)
 
 # Public headers live in include/; OS + header-only library roots come from
-# buildConfig (OS_INCLUDE_ROOT supplies SDL3*, HPP_LIBS_ROOT supplies JFLX/*).
+# buildConfig (OS_INCLUDE_ROOT supplies the SDL3 headers, HPP_LIBS_ROOT the
+# external header-only libraries; JFLXLIBS' own headers live in include/).
 # The installed interface embeds the SDL include root as well, so an installed
 # package is consumable on its own (same machine-absolute-path convention as
 # buildConfig.cmake itself).
@@ -80,29 +81,54 @@ endfunction()
 
 # ════════════════════════════════════════════════════════════════════════════
 # Components (object libraries)
+#
+# SDL3 keeps its global window/renderer configuration in a translation unit so
+# the pointers are defined exactly once; the mathematics noise generation and
+# binomial-deviation implementations are compiled for the same reason.
+# Every other sub-library (sorting, dataStructures, cryptography, positioning,
+# strings, utilities, network) is header-only and ships in include/, reached
+# through its own global header and JFLXLIBS.hpp.
 # ════════════════════════════════════════════════════════════════════════════
+jflx_add_component(jflx_sdl3_config
+        src/JFLX_SDL3_CONFIG.cpp
+        include/SDL3/JFLX_SDL3_CONFIG.hpp
+)
+
 jflx_add_component(jflx_sdl3_audio
         src/AudioHandler.cpp
-        include/JFLX/SDL3/AudioHandler.hpp
+        include/SDL3/AudioHandler.hpp
 )
 
 jflx_add_component(jflx_sdl3_text
         src/TextRenderer.cpp
-        include/JFLX/SDL3/TextRenderer.hpp
+        include/SDL3/TextRenderer.hpp
 )
 
 jflx_add_component(jflx_sdl3_texture
         src/TextureHandler.cpp
-        include/JFLX/SDL3/TextureHandler.hpp
+        include/SDL3/TextureHandler.hpp
+)
+
+jflx_add_component(jflx_math_noise_generation
+        src/noiseGeneration.cpp
+        include/mathematics/noiseGeneration.hpp
+)
+
+jflx_add_component(jflx_math_bsa
+        src/bsa.cpp
+        include/mathematics/bsa.hpp
 )
 
 # ════════════════════════════════════════════════════════════════════════════
 # Global static archive — collects every component's object files
 # ════════════════════════════════════════════════════════════════════════════
 add_library(JFLXLIBS STATIC
+        $<TARGET_OBJECTS:jflx_sdl3_config>
         $<TARGET_OBJECTS:jflx_sdl3_audio>
         $<TARGET_OBJECTS:jflx_sdl3_text>
         $<TARGET_OBJECTS:jflx_sdl3_texture>
+        $<TARGET_OBJECTS:jflx_math_noise_generation>
+        $<TARGET_OBJECTS:jflx_math_bsa>
 )
 add_library(JFLXLIBS::JFLXLIBS ALIAS JFLXLIBS)
 

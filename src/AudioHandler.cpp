@@ -2,9 +2,9 @@
 // Created by lenny on 21.01.2026.
 //
 
-#include <JFLX/SDL3/AudioHandler.hpp>
+#include <SDL3/AudioHandler.hpp>
 
-#include <JFLX/logging.hpp>
+#include <utilities/logging.hpp>
 
 #include <SDL3/SDL.h>
 

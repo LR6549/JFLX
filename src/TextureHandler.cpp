@@ -2,9 +2,9 @@
 // Created by lenny on 21.01.2026.
 //
 
-#include <JFLX/SDL3/TextureHandler.hpp>
+#include <SDL3/TextureHandler.hpp>
 
-#include <JFLX/logging.hpp>
+#include <utilities/logging.hpp>
 
 #include <SDL3_image/SDL_image.h>
 
@@ -25,6 +25,7 @@ namespace {
 
 // Only Supports png, jpg, bmp and gif
 bool JFLX::SDL3::TextureHandler::loadTextureFolder(const std::string& folderPath, SDL_ScaleMode scaling) {
+    SDL_Renderer* renderer = activeRenderer();
     if (!renderer) {
         JFLX::log("Texture folder load failed, no renderer set: ", folderPath, JFLX::LOGTYPE::JFLX_ERROR);
         return false;
@@ -64,6 +65,7 @@ bool JFLX::SDL3::TextureHandler::loadTextureFolder(const std::string& folderPath
 
 bool JFLX::SDL3::TextureHandler::loadTileset(const std::string& imagePath, int tileWidth,
                                              int tileHeight, SDL_ScaleMode scaling) {
+    SDL_Renderer* renderer = activeRenderer();
     if (!renderer) {
         JFLX::log("loadTileset failed, no renderer set: ", imagePath, JFLX::LOGTYPE::JFLX_ERROR);
         return false;
@@ -194,9 +196,14 @@ bool JFLX::SDL3::TextureHandler::unloadTexture(const std::string& name) {
 }
 
 bool JFLX::SDL3::TextureHandler::renderTexture(int layer, float x, float y, renderMode mode, float scaleX, float scaleY, double rotation, SDL_FlipMode flip, SDL_Color color) const {
+    SDL_Renderer* renderer = activeRenderer();
     SDL_Texture* tex = getTexture(layer);
     if (!tex) {
         JFLX::log("renderTexture: invalid layer: ", std::to_string(layer), JFLX::LOGTYPE::JFLX_ERROR);
+        return false;
+    }
+    if (!renderer) {
+        JFLX::log("renderTexture: no renderer set: ", std::to_string(layer), JFLX::LOGTYPE::JFLX_ERROR);
         return false;
     }
 

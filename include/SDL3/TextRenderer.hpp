@@ -7,6 +7,7 @@
 
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
+#include <SDL3/JFLX_SDL3_CONFIG.hpp>
 
 #include <string>
 #include <unordered_map>
@@ -67,7 +68,8 @@ namespace JFLX::SDL3 {
             SDL_Texture* outline = nullptr;
         };
 
-        /// The renderer used by default when no explicit renderer is passed to drawText().
+        /// The renderer used by default when no explicit renderer is passed to
+        /// drawText(). nullptr means "use JFLX::SDL3::CONFIG::g_renderer".
         SDL_Renderer* defaultRenderer = nullptr;
 
         /// Ordered list of loaded fonts. The position in this vector is the numeric index.
@@ -84,7 +86,9 @@ namespace JFLX::SDL3 {
     public:
 
         /**
-         * @brief Default constructor. No renderer is set; call setDefaultRenderer() before drawing.
+         * @brief Default constructor. No per-instance renderer is set; drawing
+         *        uses the globally configured renderer (JFLX::SDL3::CONFIG).
+         *        Call setDefaultRenderer() to use a different one.
          */
         TextRenderer();
 
@@ -106,7 +110,9 @@ namespace JFLX::SDL3 {
          * Switching to a different renderer clears the text texture cache,
          * because cached textures belong to the previous renderer.
          *
-         * @param renderer The SDL_Renderer* to use as the default.
+         * @param renderer The SDL_Renderer* to use as the default. Pass nullptr
+         *                 to fall back to the globally configured renderer
+         *                 (JFLX::SDL3::CONFIG::g_renderer).
          */
         void setDefaultRenderer(SDL_Renderer* renderer);
 

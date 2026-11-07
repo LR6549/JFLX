@@ -8,6 +8,7 @@
 #define JFLX_SDL3_TEXTUREHANDLER
 
 #include <SDL3/SDL.h>
+#include <SDL3/JFLX_SDL3_CONFIG.hpp>
 
 #include <string>
 #include <unordered_map>
@@ -52,9 +53,15 @@ namespace JFLX::SDL3 {
      */
     class TextureHandler {
     private:
-        /// Borrowed pointer to the SDL renderer used for texture creation and rendering.
-        /// Never destroyed by this class.
+        /// Per-instance renderer override, borrowed and never destroyed by this
+        /// class. nullptr means "use the globally configured renderer".
         SDL_Renderer* renderer = nullptr;
+
+        /// The renderer actually used: the per-instance override when one was
+        /// given, otherwise JFLX::SDL3::CONFIG::g_renderer.
+        [[nodiscard]] SDL_Renderer* activeRenderer() const noexcept {
+            return renderer ? renderer : CONFIG::g_renderer;
+        }
 
         /// Flat list of loaded textures. The position in this vector is the "layer index".
         /// Index 0 = first file loaded, 1 = second, etc.
@@ -65,10 +72,12 @@ namespace JFLX::SDL3 {
         std::unordered_map<std::string, int> textureLayers;
 
     public:
-        /// Default constructor – renderer must be set later via setRenderer() before use.
+        /// Default constructor – draws with the globally configured renderer
+        /// (JFLX::SDL3::CONFIG) unless one is assigned via setRenderer().
         TextureHandler() = default;
 
-        /// Preferred constructor: immediately binds a valid renderer.
+        /// Preferred constructor: immediately binds a valid renderer, which
+        /// takes precedence over the globally configured one.
         explicit TextureHandler(SDL_Renderer* renderer) : renderer(renderer) {};
 
         /**

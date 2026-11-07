@@ -2,9 +2,9 @@
 // Created by lenny on 22.01.2026.
 //
 
-#include <JFLX/SDL3/TextRenderer.hpp>
+#include <SDL3/TextRenderer.hpp>
 
-#include <JFLX/logging.hpp>
+#include <utilities/logging.hpp>
 
 #include <cstddef>
 #include <functional>
@@ -147,7 +147,8 @@ void JFLX::SDL3::TextRenderer::drawText(const std::string& text, float fontSize,
         return;
     }
 
-    SDL_Renderer* renderer = rRenderer ? rRenderer : defaultRenderer;
+    SDL_Renderer* renderer = rRenderer ? rRenderer
+                                       : (defaultRenderer ? defaultRenderer : CONFIG::g_renderer);
 
     if (!renderer) {
         JFLX::log("Renderer is nullptr: ", "", JFLX::LOGTYPE::JFLX_ERROR);
