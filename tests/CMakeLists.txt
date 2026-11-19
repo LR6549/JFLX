@@ -10,6 +10,12 @@ foreach(header audio text texture)
     add_test(NAME header_${header} COMMAND jflx_header_${header})
 endforeach()
 
+# ── json sub-library: header self-containment + behaviour (skips itself when
+#    nlohmann/json is not available) ─────────────────────────────────────────
+add_executable(jflx_header_json header_json.cpp)
+target_link_libraries(jflx_header_json PRIVATE JFLXLIBS)
+add_test(NAME header_json COMMAND jflx_header_json)
+
 # ── The umbrella header must expose every sub-library and be includable from
 #    more than one translation unit (umbrella_second.cpp is the second TU) ──
 add_executable(jflx_header_umbrella header_umbrella.cpp umbrella_second.cpp)

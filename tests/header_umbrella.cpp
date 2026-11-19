@@ -92,6 +92,19 @@ int main() {
     // ── utilities ─────────────────────────────────────────────────────────
     logDebugInfo("umbrella test");   // silent: the -d flag is off by default
 
+    // ── json (optional dependency) ─────────────────────────────────────────
+#if defined(JFLX_JSON_HAS_NLOHMANN)
+    nlohmann::json jflxDoc;
+    ok &= expect(JFLX::parseJson("{\"player\": {\"stats\": {\"hp\": 7}}}", jflxDoc),
+                 "JFLX::parseJson");
+    nlohmann::json jflxValue;
+    ok &= expect(JFLX::getJsonByPath(jflxDoc, "player.stats.hp", jflxValue) && jflxValue == 7,
+                 "JFLX::getJsonByPath");
+    ok &= expect(JFLX::setJsonByPath(jflxDoc, "player.stats.mp", 3) &&
+                 JFLX::hasJsonPath(jflxDoc, "player.stats.mp"),
+                 "JFLX::setJsonByPath / JFLX::hasJsonPath");
+#endif
+
     // ── network (optional dependencies) ───────────────────────────────────
 #if defined(JFLX_NETWORK_HAS_CURL) && defined(JFLX_NETWORK_HAS_JSON)
     ok &= expect(JFLX_NETWORK_HAS_CURL == 1 && JFLX_NETWORK_HAS_JSON == 1,

@@ -18,6 +18,7 @@
 //   strings         string manipulation
 //   utilities       logging, current path, runtime flags
 //   network         curl wrapper, Spotify wrapper (optional dependencies)
+//   json            JSON file/string I/O, path access, merging (optional dependency)
 //
 
 #ifndef JFLXLIBS_HPP
@@ -32,5 +33,6 @@
 #include <strings/strings.hpp>
 #include <utilities/utilities.hpp>
 #include <network/network.hpp>
+#include <json/json.hpp>
 
 #endif // JFLXLIBS_HPP

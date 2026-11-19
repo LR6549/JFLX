@@ -1,7 +1,7 @@
 # JFLXLIBS
 
 Unified CMake build for the JFLX libraries — **six components** compiled into
-a **single static archive** (`libJFLXLIBS.a`), plus **eight header-only
+a **single static archive** (`libJFLXLIBS.a`), plus **nine header-only
 sub-libraries**, all reachable through one umbrella header with a clean
 public/private header split.
 
@@ -45,14 +45,16 @@ the umbrella.
 | `strings` | `<strings/strings.hpp>` | `stringManipulation` |
 | `utilities` | `<utilities/utilities.hpp>` | `logging`, `curPath`, `runtimeFlags` |
 | `network` | `<network/network.hpp>` | `curlWrapper`, `spotifyWrapper` — included only when `<curl/curl.h>` resp. `<nlohmann/json.hpp>` exist (detected as `JFLX_NETWORK_HAS_CURL` / `JFLX_NETWORK_HAS_JSON`) |
+| `json` | `<json/json.hpp>` | `jsonFunctionality` (`JFLX::loadJson`/`saveJson` files, `parseJson`/`jsonToString` strings, `hasJsonPath`/`getJsonByPath`/`setJsonByPath` dotted-path access, `mergeJson` deep merge) — included only when `<nlohmann/json.hpp>` exists (detected as `JFLX_JSON_HAS_NLOHMANN`) |
 
 **Dependencies:** the SDL3 components share **SDL3** (+ `SDL3_image`,
 `SDL3_mixer`, `SDL3_ttf`) and the header-only `<utilities/logging.hpp>`; the
 mathematics components are standard-library only. Every other sub-library is
 self-contained — except `network`, which needs **libcurl** (and
-**nlohmann/json** for the Spotify wrapper). JFLXLIBS does not link either: a
-program calling `cWrap::httpGet()` or `Spotify::SpotifyWrapper` links them
-itself.
+**nlohmann/json** for the Spotify wrapper), and `json`, which needs
+**nlohmann/json**. JFLXLIBS does not link any of them: a program calling
+`cWrap::httpGet()`, `Spotify::SpotifyWrapper` or the `json` helpers links
+them itself.
 
 ## Global window & renderer configuration
 
@@ -89,7 +91,7 @@ JFLXLIBS/
 ├── include/                    # PUBLIC headers only, one folder per sub-library
 │   │                           #   each folder holds <sub-library>.hpp (global
 │   │                           #   header) + its components
-│   ├── JFLXLIBS.hpp            # umbrella: includes the 9 global headers
+│   ├── JFLXLIBS.hpp            # umbrella: includes the 10 global headers
 │   ├── SDL3/                   # compiled: config, audio, text, texture
 │   │   ├── SDL3.hpp
 │   │   ├── JFLX_SDL3_CONFIG.hpp
@@ -108,7 +110,8 @@ JFLXLIBS/
 │   ├── positioning/            # positioning.hpp, IFOV.hpp
 │   ├── strings/                # strings.hpp, stringManipulation.hpp
 │   ├── utilities/              # utilities.hpp, logging/curPath/runtimeFlags
-│   └── network/                # network.hpp, curlWrapper/spotifyWrapper
+│   ├── network/                # network.hpp, curlWrapper/spotifyWrapper
+│   └── json/                   # json.hpp, jsonFunctionality
 ├── src/                        # implementation files (private)
 │   ├── JFLX_SDL3_CONFIG.cpp
 │   ├── AudioHandler.cpp
@@ -120,6 +123,7 @@ JFLXLIBS/
 │   ├── CMakeLists.txt
 │   ├── link_smoke.cpp
 │   ├── header_{audio,text,texture}.cpp
+│   ├── header_json.cpp         # json sub-library: self-containment + behaviour
 │   ├── header_umbrella.cpp     # umbrella + every sub-library, two TUs
 │   └── umbrella_second.cpp     #   (second TU → catches duplicate symbols)
 ├── build/                      # Release build tree (generated)
@@ -175,6 +179,9 @@ cd build && ctest --output-on-failure
   archive, exercises the query APIs, and exits 0.
 - `header_audio` / `header_text` / `header_texture` — prove each public header
   compiles and links on its own.
+- `header_json` — the `json` sub-library on its own: file/string round-trips,
+  dotted-path access, deep merging, failure paths (skips itself when
+  nlohmann/json is not available).
 - `header_umbrella` — includes `<JFLXLIBS.hpp>` from **two** translation units,
   exercises every sub-library (including the compiled `bsa`/noise-generation
   symbols) and the global SDL3 configuration, so both reachability and
