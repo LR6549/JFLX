@@ -24,17 +24,17 @@ namespace {
 } // namespace
 
 // Only Supports png, jpg, bmp and gif
-bool JFLX::SDL3::TextureHandler::loadTextureFolder(const std::string& folderPath, SDL_ScaleMode scaling) {
+bool JFLX::TextureHandler::loadTextureFolder(const std::string& folderPath, SDL_ScaleMode scaling) {
     SDL_Renderer* renderer = activeRenderer();
     if (!renderer) {
-        JFLX::log("Texture folder load failed, no renderer set: ", folderPath, JFLX::LOGTYPE::JFLX_ERROR);
+        JFLX::utilities::log("Texture folder load failed, no renderer set: ", folderPath, JFLX::utilities::LOGTYPE::JFLX_ERROR);
         return false;
     }
 
     cleanup();
 
     if (!fs::exists(folderPath)) {
-        JFLX::log("Texture folder does not exist: ", folderPath, JFLX::LOGTYPE::JFLX_INFO);
+        JFLX::utilities::log("Texture folder does not exist: ", folderPath, JFLX::utilities::LOGTYPE::JFLX_INFO);
         return false;
     }
 
@@ -45,11 +45,11 @@ bool JFLX::SDL3::TextureHandler::loadTextureFolder(const std::string& folderPath
         const std::string tempNameExt = dir.path().filename().string();   // "player.png"
         const std::string tempName    = dir.path().stem().string();       // "player"
 
-        JFLX::log("Texture: ", (tempNameExt + " in " + tempPath), JFLX::LOGTYPE::JFLX_INFO);
+        JFLX::utilities::log("Texture: ", (tempNameExt + " in " + tempPath), JFLX::utilities::LOGTYPE::JFLX_INFO);
 
         SDL_Texture* tex = IMG_LoadTexture(renderer, tempPath.c_str());
         if (!tex) {
-            JFLX::log("Failed to load texture: ", SDL_GetError(), JFLX::LOGTYPE::JFLX_ERROR);
+            JFLX::utilities::log("Failed to load texture: ", SDL_GetError(), JFLX::utilities::LOGTYPE::JFLX_ERROR);
             continue;
         }
 
@@ -57,33 +57,33 @@ bool JFLX::SDL3::TextureHandler::loadTextureFolder(const std::string& folderPath
 
         textureLayers[tempName] = static_cast<int>(textures.size());
         textures.push_back(tex);
-        JFLX::log("Loaded Texture: ", tempName, JFLX::LOGTYPE::JFLX_SUCCESS);
+        JFLX::utilities::log("Loaded Texture: ", tempName, JFLX::utilities::LOGTYPE::JFLX_SUCCESS);
     }
 
     return !textures.empty();
 }
 
-bool JFLX::SDL3::TextureHandler::loadTileset(const std::string& imagePath, int tileWidth,
+bool JFLX::TextureHandler::loadTileset(const std::string& imagePath, int tileWidth,
                                              int tileHeight, SDL_ScaleMode scaling) {
     SDL_Renderer* renderer = activeRenderer();
     if (!renderer) {
-        JFLX::log("loadTileset failed, no renderer set: ", imagePath, JFLX::LOGTYPE::JFLX_ERROR);
+        JFLX::utilities::log("loadTileset failed, no renderer set: ", imagePath, JFLX::utilities::LOGTYPE::JFLX_ERROR);
         return false;
     }
     if (tileWidth <= 0 || tileHeight <= 0) {
-        JFLX::log("loadTileset: invalid tile size: ",
+        JFLX::utilities::log("loadTileset: invalid tile size: ",
                   std::to_string(tileWidth) + "x" + std::to_string(tileHeight),
-                  JFLX::LOGTYPE::JFLX_ERROR);
+                  JFLX::utilities::LOGTYPE::JFLX_ERROR);
         return false;
     }
     if (!fs::exists(imagePath)) {
-        JFLX::log("loadTileset: tilesheet not found: ", imagePath, JFLX::LOGTYPE::JFLX_ERROR);
+        JFLX::utilities::log("loadTileset: tilesheet not found: ", imagePath, JFLX::utilities::LOGTYPE::JFLX_ERROR);
         return false;
     }
 
     SDL_Surface* sheet = IMG_Load(imagePath.c_str());
     if (!sheet) {
-        JFLX::log("loadTileset: failed to load tilesheet: ", SDL_GetError(), JFLX::LOGTYPE::JFLX_ERROR);
+        JFLX::utilities::log("loadTileset: failed to load tilesheet: ", SDL_GetError(), JFLX::utilities::LOGTYPE::JFLX_ERROR);
         return false;
     }
 
@@ -91,14 +91,14 @@ bool JFLX::SDL3::TextureHandler::loadTileset(const std::string& imagePath, int t
     SDL_Surface* rgba = SDL_ConvertSurface(sheet, SDL_PIXELFORMAT_RGBA32);
     SDL_DestroySurface(sheet);
     if (!rgba) {
-        JFLX::log("loadTileset: failed to convert tilesheet: ", SDL_GetError(), JFLX::LOGTYPE::JFLX_ERROR);
+        JFLX::utilities::log("loadTileset: failed to convert tilesheet: ", SDL_GetError(), JFLX::utilities::LOGTYPE::JFLX_ERROR);
         return false;
     }
 
     const int cols = rgba->w / tileWidth;
     const int rows = rgba->h / tileHeight;
     if (cols == 0 || rows == 0) {
-        JFLX::log("loadTileset: image smaller than one tile: ", imagePath, JFLX::LOGTYPE::JFLX_ERROR);
+        JFLX::utilities::log("loadTileset: image smaller than one tile: ", imagePath, JFLX::utilities::LOGTYPE::JFLX_ERROR);
         SDL_DestroySurface(rgba);
         return false;
     }
@@ -118,14 +118,14 @@ bool JFLX::SDL3::TextureHandler::loadTileset(const std::string& imagePath, int t
                                                           SDL_PIXELFORMAT_RGBA32,
                                                           pixels, rgba->pitch);
             if (!tileView) {
-                JFLX::log("loadTileset: failed to view tile: ", SDL_GetError(), JFLX::LOGTYPE::JFLX_ERROR);
+                JFLX::utilities::log("loadTileset: failed to view tile: ", SDL_GetError(), JFLX::utilities::LOGTYPE::JFLX_ERROR);
                 continue;
             }
 
             SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, tileView);
             SDL_DestroySurface(tileView);
             if (!tex) {
-                JFLX::log("loadTileset: failed to create tile texture: ", SDL_GetError(), JFLX::LOGTYPE::JFLX_ERROR);
+                JFLX::utilities::log("loadTileset: failed to create tile texture: ", SDL_GetError(), JFLX::utilities::LOGTYPE::JFLX_ERROR);
                 continue;
             }
 
@@ -142,32 +142,32 @@ bool JFLX::SDL3::TextureHandler::loadTileset(const std::string& imagePath, int t
     SDL_DestroySurface(rgba);
 
     if (loaded == 0) {
-        JFLX::log("loadTileset: no tiles created from: ", imagePath, JFLX::LOGTYPE::JFLX_WARNING);
+        JFLX::utilities::log("loadTileset: no tiles created from: ", imagePath, JFLX::utilities::LOGTYPE::JFLX_WARNING);
         return false;
     }
 
-    JFLX::log("Sliced tilesheet: ", stem + " (" + std::to_string(loaded) + " tiles)",
-              JFLX::LOGTYPE::JFLX_SUCCESS);
+    JFLX::utilities::log("Sliced tilesheet: ", stem + " (" + std::to_string(loaded) + " tiles)",
+              JFLX::utilities::LOGTYPE::JFLX_SUCCESS);
     return true;
 }
 
-bool JFLX::SDL3::TextureHandler::exists(const std::string& name) const {
+bool JFLX::TextureHandler::exists(const std::string& name) const {
     return textureLayers.contains(name);
 }
 
-int JFLX::SDL3::TextureHandler::getTextureLayer(const std::string& name) const {
+int JFLX::TextureHandler::getTextureLayer(const std::string& name) const {
     auto it = textureLayers.find(name);
     return (it == textureLayers.end()) ? -1 : it->second;
 }
 
-SDL_Texture* JFLX::SDL3::TextureHandler::getTexture(int layer) const {
+SDL_Texture* JFLX::TextureHandler::getTexture(int layer) const {
     if (layer < 0 || layer >= static_cast<int>(textures.size())) {
         return nullptr;
     }
     return textures[layer];
 }
 
-bool JFLX::SDL3::TextureHandler::unloadTexture(int layer) {
+bool JFLX::TextureHandler::unloadTexture(int layer) {
     if (layer < 0 || layer >= static_cast<int>(textures.size())) {
         return false;
     }
@@ -187,7 +187,7 @@ bool JFLX::SDL3::TextureHandler::unloadTexture(int layer) {
     return true;
 }
 
-bool JFLX::SDL3::TextureHandler::unloadTexture(const std::string& name) {
+bool JFLX::TextureHandler::unloadTexture(const std::string& name) {
     const int layer = getTextureLayer(name);
     if (layer == -1) {
         return false;
@@ -195,15 +195,15 @@ bool JFLX::SDL3::TextureHandler::unloadTexture(const std::string& name) {
     return unloadTexture(layer);
 }
 
-bool JFLX::SDL3::TextureHandler::renderTexture(int layer, float x, float y, renderMode mode, float scaleX, float scaleY, double rotation, SDL_FlipMode flip, SDL_Color color) const {
+bool JFLX::TextureHandler::renderTexture(int layer, float x, float y, renderMode mode, float scaleX, float scaleY, double rotation, SDL_FlipMode flip, SDL_Color color) const {
     SDL_Renderer* renderer = activeRenderer();
     SDL_Texture* tex = getTexture(layer);
     if (!tex) {
-        JFLX::log("renderTexture: invalid layer: ", std::to_string(layer), JFLX::LOGTYPE::JFLX_ERROR);
+        JFLX::utilities::log("renderTexture: invalid layer: ", std::to_string(layer), JFLX::utilities::LOGTYPE::JFLX_ERROR);
         return false;
     }
     if (!renderer) {
-        JFLX::log("renderTexture: no renderer set: ", std::to_string(layer), JFLX::LOGTYPE::JFLX_ERROR);
+        JFLX::utilities::log("renderTexture: no renderer set: ", std::to_string(layer), JFLX::utilities::LOGTYPE::JFLX_ERROR);
         return false;
     }
 
@@ -255,16 +255,16 @@ bool JFLX::SDL3::TextureHandler::renderTexture(int layer, float x, float y, rend
     return true;
 }
 
-bool JFLX::SDL3::TextureHandler::renderTexture(const std::string& name, float x, float y, renderMode mode, float scaleX, float scaleY, double rotation, SDL_FlipMode flip, SDL_Color color) const {
+bool JFLX::TextureHandler::renderTexture(const std::string& name, float x, float y, renderMode mode, float scaleX, float scaleY, double rotation, SDL_FlipMode flip, SDL_Color color) const {
     const int layer = getTextureLayer(name);
     if (layer == -1) {
-        JFLX::log("renderTexture: unknown texture: ", name, JFLX::LOGTYPE::JFLX_ERROR);
+        JFLX::utilities::log("renderTexture: unknown texture: ", name, JFLX::utilities::LOGTYPE::JFLX_ERROR);
         return false;
     }
     return renderTexture(layer, x, y, mode, scaleX, scaleY, rotation, flip, color);
 }
 
-void JFLX::SDL3::TextureHandler::cleanup() {
+void JFLX::TextureHandler::cleanup() {
     for (SDL_Texture* tex : textures) {
         SDL_DestroyTexture(tex);
     }

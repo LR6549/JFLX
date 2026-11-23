@@ -21,9 +21,9 @@ namespace {
 } // namespace
 
 int main() {
-    JFLX::SDL3::AudioHandler audio;
-    JFLX::SDL3::TextRenderer text;
-    JFLX::SDL3::TextureHandler textures;
+    JFLX::AudioHandler audio;
+    JFLX::TextRenderer text;
+    JFLX::TextureHandler textures;
 
     bool ok = true;
 
@@ -68,7 +68,7 @@ int main() {
     ok &= expectFalse(textures.renderTexture(0, 0.f, 0.f), "renderTexture(empty)");
 
     // Public enum type is reachable
-    const auto mode = JFLX::SDL3::renderMode::JFLX_RENDER_CENTERED;
+    const auto mode = JFLX::renderMode::JFLX_RENDER_CENTERED;
     (void)mode;
 
     if (!ok) {

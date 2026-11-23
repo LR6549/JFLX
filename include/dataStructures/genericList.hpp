@@ -9,7 +9,7 @@ using namespace std;
 * Principle:
 * - Any In Any Out -> AI AO
 */
-namespace genericList {
+namespace JFLX {
     template <typename T>
     struct ListNode {
         T content;

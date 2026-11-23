@@ -29,47 +29,47 @@ int main() {
 
     // ── parseJson / jsonToString ───────────────────────────────────────────
     nlohmann::json doc;
-    ok &= expect(JFLX::parseJson("{\"player\": {\"stats\": {\"hp\": 7}, \"name\": \"jflx\"}}", doc),
+    ok &= expect(JFLX::json::parseJson("{\"player\": {\"stats\": {\"hp\": 7}, \"name\": \"jflx\"}}", doc),
                  "parseJson valid input");
-    ok &= expect(!JFLX::parseJson("{not json", doc), "parseJson rejects garbage");
-    ok &= expect(JFLX::parseJson(JFLX::jsonToString(doc), doc), "jsonToString round-trip");
+    ok &= expect(!JFLX::json::parseJson("{not json", doc), "parseJson rejects garbage");
+    ok &= expect(JFLX::json::parseJson(JFLX::json::jsonToString(doc), doc), "jsonToString round-trip");
 
     // ── file round-trip: saveJson / loadJson ───────────────────────────────
     const std::string testFile = (fs::temp_directory_path() / "jflx_header_json_test.json").string();
-    ok &= expect(JFLX::saveJson(testFile, doc), "saveJson writes the file");
+    ok &= expect(JFLX::json::saveJson(testFile, doc), "saveJson writes the file");
     nlohmann::json loaded = nullptr;
-    ok &= expect(JFLX::loadJson(testFile, loaded), "loadJson reads the file");
+    ok &= expect(JFLX::json::loadJson(testFile, loaded), "loadJson reads the file");
     ok &= expect(loaded == doc, "file round-trip preserves the document");
-    ok &= expect(!JFLX::loadJson("/nonexistent_jflx_test_dir/missing.json", loaded),
+    ok &= expect(!JFLX::json::loadJson("/nonexistent_jflx_test_dir/missing.json", loaded),
                  "loadJson missing file");
     fs::remove(testFile);
 
     // ── dotted-path access ─────────────────────────────────────────────────
-    ok &= expect(JFLX::hasJsonPath(doc, "player.stats.hp"), "hasJsonPath existing");
-    ok &= expect(!JFLX::hasJsonPath(doc, "player.stats.mp"), "hasJsonPath missing");
+    ok &= expect(JFLX::json::hasJsonPath(doc, "player.stats.hp"), "hasJsonPath existing");
+    ok &= expect(!JFLX::json::hasJsonPath(doc, "player.stats.mp"), "hasJsonPath missing");
     nlohmann::json value;
-    ok &= expect(JFLX::getJsonByPath(doc, "player.stats.hp", value) && value == 7,
+    ok &= expect(JFLX::json::getJsonByPath(doc, "player.stats.hp", value) && value == 7,
                  "getJsonByPath reads the value");
-    ok &= expect(!JFLX::getJsonByPath(doc, "player.stats.mp", value), "getJsonByPath missing path");
+    ok &= expect(!JFLX::json::getJsonByPath(doc, "player.stats.mp", value), "getJsonByPath missing path");
 
-    ok &= expect(JFLX::setJsonByPath(doc, "player.stats.mp", 3), "setJsonByPath creates levels");
-    ok &= expect(JFLX::hasJsonPath(doc, "player.stats.mp"), "setJsonByPath stored the value");
-    ok &= expect(!JFLX::setJsonByPath(doc, "", 1), "setJsonByPath rejects empty path");
+    ok &= expect(JFLX::json::setJsonByPath(doc, "player.stats.mp", 3), "setJsonByPath creates levels");
+    ok &= expect(JFLX::json::hasJsonPath(doc, "player.stats.mp"), "setJsonByPath stored the value");
+    ok &= expect(!JFLX::json::setJsonByPath(doc, "", 1), "setJsonByPath rejects empty path");
 
     nlohmann::json arrayDoc;
-    ok &= expect(JFLX::parseJson("{\"items\": [1, 2, 3]}", arrayDoc), "parseJson array document");
-    ok &= expect(JFLX::getJsonByPath(arrayDoc, "items.1", value) && value == 2,
+    ok &= expect(JFLX::json::parseJson("{\"items\": [1, 2, 3]}", arrayDoc), "parseJson array document");
+    ok &= expect(JFLX::json::getJsonByPath(arrayDoc, "items.1", value) && value == 2,
                  "getJsonByPath array index");
-    ok &= expect(JFLX::setJsonByPath(arrayDoc, "items.1", 20), "setJsonByPath array index");
-    ok &= expect(!JFLX::setJsonByPath(arrayDoc, "items.3", 4), "setJsonByPath rejects out of bounds");
+    ok &= expect(JFLX::json::setJsonByPath(arrayDoc, "items.1", 20), "setJsonByPath array index");
+    ok &= expect(!JFLX::json::setJsonByPath(arrayDoc, "items.3", 4), "setJsonByPath rejects out of bounds");
 
     // ── mergeJson ──────────────────────────────────────────────────────────
     nlohmann::json target;
-    ok &= expect(JFLX::parseJson("{\"a\": {\"b\": 1, \"c\": 2}, \"keep\": true}", target),
+    ok &= expect(JFLX::json::parseJson("{\"a\": {\"b\": 1, \"c\": 2}, \"keep\": true}", target),
                  "parseJson merge target");
     nlohmann::json patch;
-    ok &= expect(JFLX::parseJson("{\"a\": {\"c\": 3, \"d\": 4}}", patch), "parseJson merge patch");
-    JFLX::mergeJson(target, patch);
+    ok &= expect(JFLX::json::parseJson("{\"a\": {\"c\": 3, \"d\": 4}}", patch), "parseJson merge patch");
+    JFLX::json::mergeJson(target, patch);
     ok &= expect(target["a"]["b"] == 1, "mergeJson keeps untouched keys");
     ok &= expect(target["a"]["c"] == 3, "mergeJson lets patch values win");
     ok &= expect(target["a"]["d"] == 4, "mergeJson adds new keys");

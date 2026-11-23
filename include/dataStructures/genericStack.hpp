@@ -9,7 +9,7 @@ using namespace std;
 * Principle:
 * - First In Last Out -> LI LO
 */
-namespace genericStack {
+namespace JFLX {
     template <typename T>
     struct StackNode {
         T content;

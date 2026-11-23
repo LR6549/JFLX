@@ -5,20 +5,26 @@
 // nothing else. Each sub-library header in turn includes its own components,
 // so individual components can equally be included on their own:
 //   #include <SDL3/TextureHandler.hpp>
-//   #include <sorting/quickSort.hpp>
+//   #include <sorting/sortingAlgorithms.hpp>
+//
+// Everything lives under the JFLX namespace: classes are addressed directly
+// (JFLX::TextRenderer, JFLX::Color, …), grouped free functions sit in their
+// sub-library namespace (JFLX::json, JFLX::sort, JFLX::math, …).
 //
 // Sub-libraries:
 //   SDL3            window/renderer configuration + audio, text, textures
-//   sorting         sorting algorithms
+//   sorting         sorting algorithms (JFLX::sort)
 //   dataStructures  vectors, graphs, trees, generic list/queue/stack
 //   mathematics     prime numbers, perlin noise (header-only) + noise
-//                   generation and binomial deviation (compiled)
+//                   generation and binomial deviation (compiled) (JFLX::math)
+//   color           hex <-> RGB(A) conversion (JFLX::color)
 //   cryptography    symmetric ciphers
-//   positioning     field-of-view checks
-//   strings         string manipulation
-//   utilities       logging, current path, runtime flags
+//   positioning     field-of-view checks (JFLX::positioning)
+//   strings         string manipulation (JFLX::strings)
+//   utilities       logging, current path, runtime flags (JFLX::utilities)
 //   network         curl wrapper, Spotify wrapper (optional dependencies)
-//   json            JSON file/string I/O, path access, merging (optional dependency)
+//   json            JSON file/string I/O, path access, merging
+//                   (JFLX::json, optional dependency)
 //
 
 #ifndef JFLXLIBS_HPP
@@ -28,6 +34,7 @@
 #include <sorting/sorting.hpp>
 #include <dataStructures/dataStructures.hpp>
 #include <mathematics/mathematics.hpp>
+#include <color/color.hpp>
 #include <cryptography/cryptography.hpp>
 #include <positioning/positioning.hpp>
 #include <strings/strings.hpp>

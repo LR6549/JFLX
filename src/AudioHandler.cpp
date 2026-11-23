@@ -42,8 +42,8 @@ namespace {
 
             MIX_Audio* audio = MIX_LoadAudio(mixer, file.c_str(), false);
             if (!audio) {
-                JFLX::log(std::string("Failed to load ") + kind, file, JFLX::LOGTYPE::JFLX_ERROR);
-                JFLX::log("  SDL error: ", SDL_GetError(), JFLX::LOGTYPE::JFLX_ERROR);
+                JFLX::utilities::log(std::string("Failed to load ") + kind, file, JFLX::utilities::LOGTYPE::JFLX_ERROR);
+                JFLX::utilities::log("  SDL error: ", SDL_GetError(), JFLX::utilities::LOGTYPE::JFLX_ERROR);
                 continue;
             }
 
@@ -55,7 +55,7 @@ namespace {
                 it->second = audio;
             }
 
-            JFLX::log(std::string("Loaded ") + kind, name, JFLX::LOGTYPE::JFLX_SUCCESS);
+            JFLX::utilities::log(std::string("Loaded ") + kind, name, JFLX::utilities::LOGTYPE::JFLX_SUCCESS);
             ++loaded;
         }
 
@@ -64,10 +64,10 @@ namespace {
 
 } // namespace
 
-JFLX::SDL3::AudioHandler::AudioHandler() {
+JFLX::AudioHandler::AudioHandler() {
     // Initialize SDL_mixer if needed
     if (!MIX_Init()) {
-        JFLX::log("Failed to initialize SDL_mixer: ", SDL_GetError(), JFLX::LOGTYPE::JFLX_ERROR);
+        JFLX::utilities::log("Failed to initialize SDL_mixer: ", SDL_GetError(), JFLX::utilities::LOGTYPE::JFLX_ERROR);
     }
 
     SDL_AudioSpec audioSpec;
@@ -79,7 +79,7 @@ JFLX::SDL3::AudioHandler::AudioHandler() {
     soundMixer = MIX_CreateMixer(&audioSpec);
 
     if (!musicMixer || !soundMixer) {
-        JFLX::log("Failed to create audio mixers: ", SDL_GetError(), JFLX::LOGTYPE::JFLX_ERROR);
+        JFLX::utilities::log("Failed to create audio mixers: ", SDL_GetError(), JFLX::utilities::LOGTYPE::JFLX_ERROR);
     }
 
     musicTrack = MIX_CreateTrack(musicMixer);
@@ -90,7 +90,7 @@ JFLX::SDL3::AudioHandler::AudioHandler() {
     }
 }
 
-JFLX::SDL3::AudioHandler::~AudioHandler() {
+JFLX::AudioHandler::~AudioHandler() {
     // Drop any queued switch first so the stopped callback can never observe
     // audio that clear() is about to destroy.
     MIX_LockMixer(musicMixer);
@@ -109,7 +109,7 @@ JFLX::SDL3::AudioHandler::~AudioHandler() {
     MIX_Quit();
 }
 
-void JFLX::SDL3::AudioHandler::clear() {
+void JFLX::AudioHandler::clear() {
     for (const auto& entry : soundMap) {
         if (entry.second) MIX_DestroyAudio(entry.second);
     }
@@ -121,54 +121,54 @@ void JFLX::SDL3::AudioHandler::clear() {
     musicMap.clear();
 }
 
-bool JFLX::SDL3::AudioHandler::loadSounds(const std::string& path) {
+bool JFLX::AudioHandler::loadSounds(const std::string& path) {
     const fs::path soundFolder = fs::path(path) / "sounds";
     if (!fs::exists(soundFolder)) {
-        JFLX::log("Sound folder does not exist: ", soundFolder.string(), JFLX::LOGTYPE::JFLX_ERROR);
+        JFLX::utilities::log("Sound folder does not exist: ", soundFolder.string(), JFLX::utilities::LOGTYPE::JFLX_ERROR);
         return false;
     }
 
     const size_t loaded = loadAudioFolder(soundFolder, soundMixer, soundMap, "sound");
     if (loaded == 0) {
-        JFLX::log("No sound files loaded from: ", soundFolder.string(), JFLX::LOGTYPE::JFLX_WARNING);
+        JFLX::utilities::log("No sound files loaded from: ", soundFolder.string(), JFLX::utilities::LOGTYPE::JFLX_WARNING);
         return false;
     }
     return true;
 }
 
-bool JFLX::SDL3::AudioHandler::loadMusic(const std::string& path) {
+bool JFLX::AudioHandler::loadMusic(const std::string& path) {
     const fs::path musicFolder = fs::path(path) / "data" / "music";
     if (!fs::exists(musicFolder)) {
-        JFLX::log("Music folder does not exist: ", musicFolder.string(), JFLX::LOGTYPE::JFLX_ERROR);
+        JFLX::utilities::log("Music folder does not exist: ", musicFolder.string(), JFLX::utilities::LOGTYPE::JFLX_ERROR);
         return false;
     }
 
     const size_t loaded = loadAudioFolder(musicFolder, musicMixer, musicMap, "music");
     if (loaded == 0) {
-        JFLX::log("No music files loaded from: ", musicFolder.string(), JFLX::LOGTYPE::JFLX_WARNING);
+        JFLX::utilities::log("No music files loaded from: ", musicFolder.string(), JFLX::utilities::LOGTYPE::JFLX_WARNING);
         return false;
     }
     return true;
 }
 
-void JFLX::SDL3::AudioHandler::playSound(const std::string& soundName) {
+void JFLX::AudioHandler::playSound(const std::string& soundName) {
     const auto it = soundMap.find(soundName);
     if (it == soundMap.cend()) {
-        JFLX::log("Sound not found: ", soundName, JFLX::LOGTYPE::JFLX_ERROR);
+        JFLX::utilities::log("Sound not found: ", soundName, JFLX::utilities::LOGTYPE::JFLX_ERROR);
         return;
     }
 
     if (MIX_Audio* audio = it->second; MIX_PlayAudio(soundMixer, audio)) {
-        JFLX::log("Played sound: ", soundName, JFLX::LOGTYPE::JFLX_SUCCESS);
+        JFLX::utilities::log("Played sound: ", soundName, JFLX::utilities::LOGTYPE::JFLX_SUCCESS);
     } else {
-        JFLX::log("MIX_PlayAudio failed: ", SDL_GetError(), JFLX::LOGTYPE::JFLX_ERROR);
+        JFLX::utilities::log("MIX_PlayAudio failed: ", SDL_GetError(), JFLX::utilities::LOGTYPE::JFLX_ERROR);
     }
 }
 
-void JFLX::SDL3::AudioHandler::playMusic(const std::string& name, int fadeInMs) {
+void JFLX::AudioHandler::playMusic(const std::string& name, int fadeInMs) {
     const auto it = musicMap.find(name);
     if (it == musicMap.end()) {
-        JFLX::log("Music not found: ", name, JFLX::LOGTYPE::JFLX_ERROR);
+        JFLX::utilities::log("Music not found: ", name, JFLX::utilities::LOGTYPE::JFLX_ERROR);
         return;
     }
 
@@ -178,14 +178,14 @@ void JFLX::SDL3::AudioHandler::playMusic(const std::string& name, int fadeInMs) 
 
     if (pendingMusic.audio == audio) {
         MIX_UnlockMixer(musicMixer);
-        JFLX::log("Music already queued: ", name, JFLX::LOGTYPE::JFLX_INFO);
+        JFLX::utilities::log("Music already queued: ", name, JFLX::utilities::LOGTYPE::JFLX_INFO);
         return;
     }
 
     if (musicTrack && MIX_TrackPlaying(musicTrack) &&
         MIX_GetTrackAudio(musicTrack) == audio && pendingMusic.audio == nullptr) {
         MIX_UnlockMixer(musicMixer);
-        JFLX::log("Music already playing: ", name, JFLX::LOGTYPE::JFLX_INFO);
+        JFLX::utilities::log("Music already playing: ", name, JFLX::utilities::LOGTYPE::JFLX_INFO);
         return;
     }
 
@@ -202,9 +202,9 @@ void JFLX::SDL3::AudioHandler::playMusic(const std::string& name, int fadeInMs) 
     }
 }
 
-void JFLX::SDL3::AudioHandler::startMusicTrack(MIX_Audio* audio, int fadeInMs, const std::string& name) {
+void JFLX::AudioHandler::startMusicTrack(MIX_Audio* audio, int fadeInMs, const std::string& name) {
     if (!musicTrack) {
-        JFLX::log("No music track available: ", name, JFLX::LOGTYPE::JFLX_ERROR);
+        JFLX::utilities::log("No music track available: ", name, JFLX::utilities::LOGTYPE::JFLX_ERROR);
         return;
     }
 
@@ -215,15 +215,15 @@ void JFLX::SDL3::AudioHandler::startMusicTrack(MIX_Audio* audio, int fadeInMs, c
     SDL_SetNumberProperty(options, MIX_PROP_PLAY_FADE_IN_MILLISECONDS_NUMBER, fadeInMs);
 
     if (MIX_PlayTrack(musicTrack, options)) {
-        JFLX::log("Playing music: ", name, JFLX::LOGTYPE::JFLX_SUCCESS);
+        JFLX::utilities::log("Playing music: ", name, JFLX::utilities::LOGTYPE::JFLX_SUCCESS);
     } else {
-        JFLX::log("MIX_PlayTrack failed: ", SDL_GetError(), JFLX::LOGTYPE::JFLX_ERROR);
+        JFLX::utilities::log("MIX_PlayTrack failed: ", SDL_GetError(), JFLX::utilities::LOGTYPE::JFLX_ERROR);
     }
 
     SDL_DestroyProperties(options);
 }
 
-void JFLX::SDL3::AudioHandler::fadeOutMusicTrack(const int fadeOutMs) const {
+void JFLX::AudioHandler::fadeOutMusicTrack(const int fadeOutMs) const {
     if (musicTrack && MIX_TrackPlaying(musicTrack)) {
         // MIX_StopTrack() takes sample frames; convert the caller's milliseconds.
         const Sint64 fadeOutFrames = (fadeOutMs > 0)
@@ -231,12 +231,12 @@ void JFLX::SDL3::AudioHandler::fadeOutMusicTrack(const int fadeOutMs) const {
                 : 0;
 
         if (!MIX_StopTrack(musicTrack, fadeOutFrames)) {
-            JFLX::log("Failed to stop music track: ", SDL_GetError(), JFLX::LOGTYPE::JFLX_ERROR);
+            JFLX::utilities::log("Failed to stop music track: ", SDL_GetError(), JFLX::utilities::LOGTYPE::JFLX_ERROR);
         }
     }
 }
 
-void SDLCALL JFLX::SDL3::AudioHandler::onMusicTrackStopped(void* userdata, MIX_Track* track) {
+void SDLCALL JFLX::AudioHandler::onMusicTrackStopped(void* userdata, MIX_Track* track) {
     auto* self = static_cast<AudioHandler*>(userdata);
     if (!self || track != self->musicTrack) return;
 
@@ -250,7 +250,7 @@ void SDLCALL JFLX::SDL3::AudioHandler::onMusicTrackStopped(void* userdata, MIX_T
     }
 }
 
-void JFLX::SDL3::AudioHandler::stopMusic(const int fadeOutMs) const {
+void JFLX::AudioHandler::stopMusic(const int fadeOutMs) const {
     // A user-requested stop cancels any queued track switch.
     MIX_LockMixer(musicMixer);
     pendingMusic = {};
@@ -259,38 +259,38 @@ void JFLX::SDL3::AudioHandler::stopMusic(const int fadeOutMs) const {
     fadeOutMusicTrack(fadeOutMs);
 }
 
-bool JFLX::SDL3::AudioHandler::pauseMusic() {
+bool JFLX::AudioHandler::pauseMusic() {
     if (!musicTrack) return false;
     return MIX_PauseTrack(musicTrack);
 }
 
-bool JFLX::SDL3::AudioHandler::resumeMusic() {
+bool JFLX::AudioHandler::resumeMusic() {
     if (!musicTrack) return false;
     return MIX_ResumeTrack(musicTrack);
 }
 
-bool JFLX::SDL3::AudioHandler::setSoundVolume(const float volume) {
+bool JFLX::AudioHandler::setSoundVolume(const float volume) {
     if (!soundMixer) return false;
     return MIX_SetMixerGain(soundMixer, volume < 0.f ? 0.f : volume);
 }
 
-float JFLX::SDL3::AudioHandler::getSoundVolume() const {
+float JFLX::AudioHandler::getSoundVolume() const {
     return soundMixer ? MIX_GetMixerGain(soundMixer) : 1.0f;
 }
 
-bool JFLX::SDL3::AudioHandler::setMusicVolume(const float volume) {
+bool JFLX::AudioHandler::setMusicVolume(const float volume) {
     if (!musicMixer) return false;
     return MIX_SetMixerGain(musicMixer, volume < 0.f ? 0.f : volume);
 }
 
-float JFLX::SDL3::AudioHandler::getMusicVolume() const {
+float JFLX::AudioHandler::getMusicVolume() const {
     return musicMixer ? MIX_GetMixerGain(musicMixer) : 1.0f;
 }
 
-bool JFLX::SDL3::AudioHandler::unloadSound(const std::string& soundName) {
+bool JFLX::AudioHandler::unloadSound(const std::string& soundName) {
     const auto it = soundMap.find(soundName);
     if (it == soundMap.end()) {
-        JFLX::log("Sound not found: ", soundName, JFLX::LOGTYPE::JFLX_WARNING);
+        JFLX::utilities::log("Sound not found: ", soundName, JFLX::utilities::LOGTYPE::JFLX_WARNING);
         return false;
     }
 
@@ -301,10 +301,10 @@ bool JFLX::SDL3::AudioHandler::unloadSound(const std::string& soundName) {
     return true;
 }
 
-bool JFLX::SDL3::AudioHandler::unloadMusic(const std::string& musicName) {
+bool JFLX::AudioHandler::unloadMusic(const std::string& musicName) {
     const auto it = musicMap.find(musicName);
     if (it == musicMap.end()) {
-        JFLX::log("Music not found: ", musicName, JFLX::LOGTYPE::JFLX_WARNING);
+        JFLX::utilities::log("Music not found: ", musicName, JFLX::utilities::LOGTYPE::JFLX_WARNING);
         return false;
     }
 
@@ -324,10 +324,10 @@ bool JFLX::SDL3::AudioHandler::unloadMusic(const std::string& musicName) {
     return true;
 }
 
-bool JFLX::SDL3::AudioHandler::hasSound(const std::string& soundName) const {
+bool JFLX::AudioHandler::hasSound(const std::string& soundName) const {
     return soundMap.contains(soundName);
 }
 
-bool JFLX::SDL3::AudioHandler::hasMusic(const std::string& musicName) const {
+bool JFLX::AudioHandler::hasMusic(const std::string& musicName) const {
     return musicMap.contains(musicName);
 }

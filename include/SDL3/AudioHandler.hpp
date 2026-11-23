@@ -16,7 +16,7 @@
 // SDL3_mixer extension header (MIX_Audio, MIX_Mixer, MIX_Track)
 #include <SDL3_mixer/SDL_mixer.h>
 
-namespace JFLX::SDL3 {
+namespace JFLX {
 
     /**
      * @class AudioHandler
@@ -270,6 +270,6 @@ namespace JFLX::SDL3 {
         void clear();
     };
 
-} // namespace JFLX::SDL3
+} // namespace JFLX
 
 #endif // JFLX_SDL3_AUDIOHANDLER_HPP

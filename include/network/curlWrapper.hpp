@@ -10,7 +10,7 @@
 #include <string>
 #include <fstream>
 
-namespace cWrap {
+namespace JFLX::network {
     static size_t WriteCallback(void* contents, size_t size, size_t nmemb, std::string* output) {
         size_t totalSize = size * nmemb;
         output->append(static_cast<char*>(contents), totalSize);

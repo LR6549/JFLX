@@ -17,7 +17,7 @@ using namespace std;
 /*
 * Some Calculations for prime numbers
 */
-namespace PrimeNumbers {
+namespace JFLX::math {
     /*
     * O(sqrt(n))
     * @param[in] pNumber -> The speculated Prime

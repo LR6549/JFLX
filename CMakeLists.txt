@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(JFLXLIBS VERSION 1.1.0 LANGUAGES CXX)
+project(JFLXLIBS VERSION 2.0.0 LANGUAGES CXX)
 
 # ════════════════════════════════════════════════════════════════════════════
 # Global build configuration — single source of truth for every JFLXLIBS
@@ -85,9 +85,9 @@ endfunction()
 # SDL3 keeps its global window/renderer configuration in a translation unit so
 # the pointers are defined exactly once; the mathematics noise generation and
 # binomial-deviation implementations are compiled for the same reason.
-# Every other sub-library (sorting, dataStructures, cryptography, positioning,
-# strings, utilities, json, network) is header-only and ships in include/,
-# reached through its own global header and JFLXLIBS.hpp.
+# Every other sub-library (sorting, dataStructures, color, cryptography,
+# positioning, strings, utilities, json, network) is header-only and ships in
+# include/, reached through its own global header and JFLXLIBS.hpp.
 # ════════════════════════════════════════════════════════════════════════════
 jflx_add_component(jflx_sdl3_config
         src/JFLX_SDL3_CONFIG.cpp

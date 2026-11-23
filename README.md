@@ -1,9 +1,9 @@
 # JFLXLIBS
 
 Unified CMake build for the JFLX libraries — **six components** compiled into
-a **single static archive** (`libJFLXLIBS.a`), plus **nine header-only
+a **single static archive** (`libJFLXLIBS.a`), plus **ten header-only
 sub-libraries**, all reachable through one umbrella header with a clean
-public/private header split.
+public/private header split. Everything lives under the `JFLX` namespace.
 
 ## Entry point
 
@@ -22,30 +22,50 @@ public/private header split.
 in turn includes its own components — no component is pulled in directly by
 the umbrella.
 
+## Namespace layout
+
+All symbols live under `JFLX`: classes and structs are addressed directly,
+grouped free functions sit in their sub-library namespace.
+
+| Area | Namespace |
+|---|---|
+| JSON helpers | `JFLX::json` |
+| Sorting algorithms | `JFLX::sort` (helpers in `JFLX::sort::detail`) |
+| Mathematics (primes, binomial statistics) | `JFLX::math` |
+| Perlin noise (header-only / compiled variant) | `JFLX::math::perlin` / `JFLX::math::noise` |
+| Hex ↔ RGB(A) conversion | `JFLX::color` |
+| String manipulation | `JFLX::strings` |
+| Logging, paths, runtime flags | `JFLX::utilities` |
+| Network helpers | `JFLX::network` |
+| Field-of-view | `JFLX::positioning` |
+| Window/renderer configuration | `JFLX::config` |
+| Classes and structs | `JFLX` directly — e.g. `JFLX::TextRenderer`, `JFLX::TextureHandler`, `JFLX::AudioHandler`, `JFLX::renderMode`, `JFLX::Color`, `JFLX::Vector2`, `JFLX::Vertex`/`Edge`/`Graph`, `JFLX::BinaryTree`, `JFLX::Stack`/`Queue`/`List`, `JFLX::CeasarCypher`, `JFLX::SpotifyWrapper` |
+
 ## Compiled components
 
 | Component | Public header | Purpose |
 |---|---|---|
-| `jflx_sdl3_config` | `<SDL3/JFLX_SDL3_CONFIG.hpp>` | Global window/renderer configuration: `JFLX::SDL3::CONFIG::g_window`/`g_renderer` plus `setWindow()`/`setRenderer()`. |
+| `jflx_sdl3_config` | `<SDL3/JFLX_SDL3_CONFIG.hpp>` | Global window/renderer configuration: `JFLX::config::g_window`/`g_renderer` plus `setWindow()`/`setRenderer()`. |
 | `jflx_sdl3_audio` | `<SDL3/AudioHandler.hpp>` | Loads and plays sounds/music via SDL3_mixer. Sounds overlap freely on one mixer; music plays on a dedicated track with a true fade-out-then-fade-in transition (completed via the track-stopped callback). Master gain control (`setSoundVolume`/`setMusicVolume` + getters), `pauseMusic`/`resumeMusic`, and per-asset `unloadSound`/`unloadMusic`. Assets live in `<root>/sounds/` (sounds) and `<root>/data/music/` (music), keyed by filename stem. Supports `.mp3`, `.ogg`, `.wav`, `.flac`. |
 | `jflx_sdl3_text` | `<SDL3/TextRenderer.hpp>` | Loads TTF fonts and draws UTF-8 text onto an `SDL_Renderer` (by font pointer, index, or name), with optional 8-direction outline. `measureText()` reports the pixel size of a string without rendering. Rendered text textures are cached and reused across frames; `unloadFont()` removes a single font (with cache/index upkeep). |
 | `jflx_sdl3_texture` | `<SDL3/TextureHandler.hpp>` | Loads image folders as named/indexed texture layers, slices tilesheets into individual tiles (`loadTileset`), renders with anchor modes, rotation, flip, and colour modulation, and removes single textures via `unloadTexture()` (layer indices re-map automatically). |
-| `jflx_math_noise_generation` | `<mathematics/noiseGeneration.hpp>` | Perlin noise over a random gradient grid (namespace `perlinNoise`): grid initialisation, `fade`/`lerp` interpolation, and the scalar and `noiseMap` variants. |
-| `jflx_math_bsa` | `<mathematics/bsa.hpp>` | Binomial statistics (namespace `bsa`): µ, sigma from *n/p* or from a known µ, k-sigma intervals, factorial/binomial coefficient, hit chances. |
+| `jflx_math_noise_generation` | `<mathematics/noiseGeneration.hpp>` | Perlin noise over a random gradient grid (namespace `JFLX::math::noise`): grid initialisation, `fade`/`lerp` interpolation, and the scalar and `noiseMap` variants. |
+| `jflx_math_bsa` | `<mathematics/bsa.hpp>` | Binomial statistics (namespace `JFLX::math`): µ, sigma from *n/p* or from a known µ, k-sigma intervals, factorial/binomial coefficient, hit chances. |
 
 ## Header-only sub-libraries
 
 | Sub-library | Global header | Components |
 |---|---|---|
-| `sorting` | `<sorting/sorting.hpp>` | `sortingAlgorithms` (`JFLX::MergeSort`, `JFLX::QuickSort`, …) plus `heapSort`, `mergeSort`, `quickSort`, `selectionSort`, `insertionSort`, `gnomeSort`, `bubbleSort`, `bogoSort` |
-| `dataStructures` | `<dataStructures/dataStructures.hpp>` | `vectors`, `graph`, `binaryTree`, `genericDataStructures`, `genericList`, `genericQueue`, `genericStack` |
-| `mathematics` | `<mathematics/mathematics.hpp>` | `primeNumbers`, `perlinNoise` (header-only; the noise-generation and `bsa` components above are compiled) |
-| `cryptography` | `<cryptography/cryptography.hpp>` | `ceasarCypher` |
-| `positioning` | `<positioning/positioning.hpp>` | `IFOV` (field-of-view test over `JFLX::vects::Vector2`) |
-| `strings` | `<strings/strings.hpp>` | `stringManipulation` |
-| `utilities` | `<utilities/utilities.hpp>` | `logging`, `curPath`, `runtimeFlags` |
-| `network` | `<network/network.hpp>` | `curlWrapper`, `spotifyWrapper` — included only when `<curl/curl.h>` resp. `<nlohmann/json.hpp>` exist (detected as `JFLX_NETWORK_HAS_CURL` / `JFLX_NETWORK_HAS_JSON`) |
-| `json` | `<json/json.hpp>` | `jsonFunctionality` (`JFLX::loadJson`/`saveJson` files, `parseJson`/`jsonToString` strings, `hasJsonPath`/`getJsonByPath`/`setJsonByPath` dotted-path access, `mergeJson` deep merge) — included only when `<nlohmann/json.hpp>` exists (detected as `JFLX_JSON_HAS_NLOHMANN`) |
+| `sorting` | `<sorting/sorting.hpp>` | `sortingAlgorithms` — all algorithms under `JFLX::sort` (`mergeSort`, `quickSort`, `selectionSort`, `insertionSort`, `gnomeSort`, `bubbleSort`, `heapSort`, `bogoSort`), helpers in `JFLX::sort::detail` |
+| `dataStructures` | `<dataStructures/dataStructures.hpp>` | `vectors` (`JFLX::Vector2`), `graph` (`JFLX::Vertex`/`Edge`/`Graph`), `binaryTree` (`JFLX::BinaryTree`), `genericList`/`genericQueue`/`genericStack` (`JFLX::List`/`Queue`/`Stack`) |
+| `mathematics` | `<mathematics/mathematics.hpp>` | `primeNumbers`, `perlinNoise` (header-only, `JFLX::math::perlin`; the noise-generation and `bsa` components above are compiled into `JFLX::math`) |
+| `color` | `<color/color.hpp>` | `Color` (`JFLX::Color`, `.r`/`.g`/`.b`/`.a`, from hex or RGB) + `JFLX::color::hexToRgb`/`rgbToHex`, `blend`/`blendPercent` (linear interpolation between two colors) |
+| `cryptography` | `<cryptography/cryptography.hpp>` | `ceasarCypher` (`JFLX::CeasarCypher`) |
+| `positioning` | `<positioning/positioning.hpp>` | `IFOV` — `JFLX::positioning::isInFOV` over `JFLX::Vector2` |
+| `strings` | `<strings/strings.hpp>` | `stringManipulation` (`JFLX::strings::toLower`/`toUpper`) |
+| `utilities` | `<utilities/utilities.hpp>` | `logging`, `curPath`, `runtimeFlags` (`JFLX::utilities`) |
+| `network` | `<network/network.hpp>` | `curlWrapper` (`JFLX::network::httpGet`), `spotifyWrapper` (`JFLX::SpotifyWrapper`) — included only when `<curl/curl.h>` resp. `<nlohmann/json.hpp>` exist (detected as `JFLX_NETWORK_HAS_CURL` / `JFLX_NETWORK_HAS_JSON`) |
+| `json` | `<json/json.hpp>` | `jsonFunctionality` (`JFLX::json::loadJson`/`saveJson` files, `parseJson`/`jsonToString` strings, `hasJsonPath`/`getJsonByPath`/`setJsonByPath` dotted-path access, `mergeJson` deep merge) — included only when `<nlohmann/json.hpp>` exists (detected as `JFLX_JSON_HAS_NLOHMANN`) |
 
 **Dependencies:** the SDL3 components share **SDL3** (+ `SDL3_image`,
 `SDL3_mixer`, `SDL3_ttf`) and the header-only `<utilities/logging.hpp>`; the
@@ -53,7 +73,7 @@ mathematics components are standard-library only. Every other sub-library is
 self-contained — except `network`, which needs **libcurl** (and
 **nlohmann/json** for the Spotify wrapper), and `json`, which needs
 **nlohmann/json**. JFLXLIBS does not link any of them: a program calling
-`cWrap::httpGet()`, `Spotify::SpotifyWrapper` or the `json` helpers links
+`JFLX::network::httpGet()`, `JFLX::SpotifyWrapper` or the `json` helpers links
 them itself.
 
 ## Global window & renderer configuration
@@ -66,11 +86,11 @@ The SDL3 window/renderer are managed centrally instead of per module:
 SDL_Window*   window   = /* create SDL3 window */;
 SDL_Renderer* renderer = /* create SDL3 renderer */;
 
-JFLX::SDL3::CONFIG::setWindow(window);
-JFLX::SDL3::CONFIG::setRenderer(renderer);
+JFLX::config::setWindow(window);
+JFLX::config::setRenderer(renderer);
 
-JFLX::SDL3::TextureHandler textures;   // uses CONFIG::g_renderer
-JFLX::SDL3::TextRenderer   text;       // ditto, unless given one explicitly
+JFLX::TextureHandler textures;   // uses config::g_renderer
+JFLX::TextRenderer   text;       // ditto, unless given one explicitly
 ```
 
 - A per-instance renderer (`TextureHandler(SDL_Renderer*)`, `setRenderer()`,
@@ -91,7 +111,7 @@ JFLXLIBS/
 ├── include/                    # PUBLIC headers only, one folder per sub-library
 │   │                           #   each folder holds <sub-library>.hpp (global
 │   │                           #   header) + its components
-│   ├── JFLXLIBS.hpp            # umbrella: includes the 10 global headers
+│   ├── JFLXLIBS.hpp            # umbrella: includes the 11 global headers
 │   ├── SDL3/                   # compiled: config, audio, text, texture
 │   │   ├── SDL3.hpp
 │   │   ├── JFLX_SDL3_CONFIG.hpp
@@ -104,8 +124,9 @@ JFLXLIBS/
 │   │   ├── perlinNoise.hpp
 │   │   ├── noiseGeneration.hpp
 │   │   └── bsa.hpp
-│   ├── sorting/                # sorting.hpp + sortingAlgorithms + 8 sorts
-│   ├── dataStructures/         # dataStructures.hpp + 7 component headers
+│   ├── sorting/                # sorting.hpp + sortingAlgorithms (8 sorts)
+│   ├── dataStructures/         # dataStructures.hpp + 6 component headers
+│   ├── color/                  # color.hpp (Color + hex <-> RGB(A))
 │   ├── cryptography/           # cryptography.hpp, ceasarCypher.hpp
 │   ├── positioning/            # positioning.hpp, IFOV.hpp
 │   ├── strings/                # strings.hpp, stringManipulation.hpp
@@ -122,7 +143,7 @@ JFLXLIBS/
 ├── tests/                      # link + header self-containment tests
 │   ├── CMakeLists.txt
 │   ├── link_smoke.cpp
-│   ├── header_{audio,text,texture}.cpp
+│   ├── header_{audio,text,texture,color}.cpp
 │   ├── header_json.cpp         # json sub-library: self-containment + behaviour
 │   ├── header_umbrella.cpp     # umbrella + every sub-library, two TUs
 │   └── umbrella_second.cpp     #   (second TU → catches duplicate symbols)
@@ -177,8 +198,9 @@ cd build && ctest --output-on-failure
 
 - `link_smoke` — an application that uses **only** the public headers and the
   archive, exercises the query APIs, and exits 0.
-- `header_audio` / `header_text` / `header_texture` — prove each public header
-  compiles and links on its own.
+- `header_audio` / `header_text` / `header_texture` / `header_color` — prove
+  each public header compiles and links on its own (the color test also checks
+  the hex ↔ RGB(A) round-trips and error handling).
 - `header_json` — the `json` sub-library on its own: file/string round-trips,
   dotted-path access, deep merging, failure paths (skips itself when
   nlohmann/json is not available).
@@ -260,9 +282,25 @@ package (`find_package(JFLXLIBS)`) under `<prefix>`.
    finished its fade-out (as documented), instead of switching immediately.
    `stopMusic()`/`pauseMusic()` cancel or defer a queued switch accordingly.
 8. **Renderer fallback** — `TextureHandler` and `TextRenderer` fall back to
-   `JFLX::SDL3::CONFIG::g_renderer` when they were not given one. Code that
+   `JFLX::config::g_renderer` when they were not given one. Code that
    relied on "no renderer set" failing now draws with the global renderer (or
    fails only when the global one is unset too).
+9. **Namespaces** — every symbol moved under `JFLX`; the old namespaces are
+   gone (see "Namespace layout" for the new homes). Highlights:
+   `JFLX::SDL3::CONFIG` → `JFLX::config`, `JFLX::SDL3::TextRenderer` & co. →
+   `JFLX::TextRenderer` & co., `JFLX::MergeSort::sort` and the `heapSort::`…/
+   `mergeSort::`… family → `JFLX::sort::mergeSort`/… (one entry point per
+   algorithm), `JFLX::vects::Vector2` → `JFLX::Vector2`, `Graph::`/`binSearchTree::`
+   → `JFLX::`, the `generic*` structures → `JFLX::Stack`/`Queue`/`List`,
+   `PrimeNumbers::`/`bsa::` → `JFLX::math::`, `perlinNoise::` →
+   `JFLX::math::noise::` (header-only variant: `JFLX::math::perlin::`),
+   `ceasarCypher::CeasarCypher` → `JFLX::CeasarCypher`, `Spotify::SpotifyWrapper`
+   → `JFLX::SpotifyWrapper`, `cWrap::httpGet` → `JFLX::network::httpGet`,
+   `isInFOV` → `JFLX::positioning::isInFOV`, the json helpers → `JFLX::json::`,
+   logging/curPath/runtimeFlags → `JFLX::utilities::`, string helpers →
+   `JFLX::strings::`. The duplicate implementations the old namespaces hosted
+   (per-algorithm sort headers, `genericDataStructures.hpp`) were consolidated
+   away; `heapSort`/`bogoSort` moved into `sortingAlgorithms.hpp` style.
 
 ## Approved additions (new API)
 
@@ -280,6 +318,13 @@ package (`find_package(JFLXLIBS)`) under `<prefix>`.
   layer indices shift down and name→layer entries re-map.
 - `TextureHandler::loadTileset(...)` and `TextRenderer::clearTextCache()`
   (see above).
+- `color` sub-library (new): `JFLX::Color` (`.r`/`.g`/`.b`/`.a`, constructible
+  from `#RGB`/`#RGBA`/`#RRGGBB`/`#RRGGBBAA` or channel values) plus
+  `JFLX::color::hexToRgb`/`rgbToHex`; malformed hex throws
+  `std::invalid_argument`.
+- `JFLX::color::blend(a, b, amount)` / `JFLX::color::blendPercent(a, b, percent)`
+  — linear per-channel interpolation (alpha included) returning a new
+  `JFLX::Color`; the degree is given as 0.0–1.0 resp. 0–100 and clamped.
 
 ## Integrated payload (`LIBRARIES TO ADD TO THE MAIN PROJECT/`)
 
@@ -335,11 +380,12 @@ over:
 
 ## Open points (need approval)
 
-1. `perlinNoise::perlinNoise(noiseMap, seed, smoothness)` takes the map **by
-   value** — it fills a copy and the caller's grid stays untouched (asserted
-   by `header_umbrella`). Switching it to a reference is a one-word change.
-2. `bsa::calculateHitChance(n, p, k)` uses `p²·(1-p)²` instead of
-   `pᵏ·(1-p)ⁿ⁻ᵏ`, and `bsa::calculateHitChanceForInterval(...)` sums that same
+1. `JFLX::math::noise::perlinNoise(noiseMap, seed, smoothness)` takes the map
+   **by value** — it fills a copy and the caller's grid stays untouched
+   (asserted by `header_umbrella`). Switching it to a reference is a one-word
+   change.
+2. `JFLX::math::calculateHitChance(n, p, k)` uses `p²·(1-p)²` instead of
+   `pᵏ·(1-p)ⁿ⁻ᵏ`, and `calculateHitChanceForInterval(...)` sums that same
    constant `k` instead of stepping `i` across `[min, max)`. Both look like
    unfinished formulas; fixing them changes numeric results.
 3. `graph.hpp` behaviour: `Edge::operator==` compares `vertexA` twice (never
@@ -349,7 +395,7 @@ over:
    gets marked.
 4. `network` stays header-only — linking libcurl/nlohmann-json into the
    archive would add a hard dependency for every consumer.
-5. `CONFIG::g_window` has no consumer yet; a window/event component would need
+5. `config::g_window` has no consumer yet; a window/event component would need
    approval.
 6. `include/SDL3/` merges into SDL3's own include directory when installed (no
    name collisions today); a `JFLX_SDL3/` folder would avoid the merge.

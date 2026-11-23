@@ -4,7 +4,7 @@
 #include <iostream>
 #include <string>
 
-namespace JFLX {
+namespace JFLX::utilities {
 
     //* Log types
     enum class LOGTYPE {

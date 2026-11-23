@@ -13,7 +13,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace JFLX::SDL3 {
+namespace JFLX {
 
     /**
      * @brief A utility class for rendering TrueType fonts via SDL3_ttf.
@@ -69,7 +69,7 @@ namespace JFLX::SDL3 {
         };
 
         /// The renderer used by default when no explicit renderer is passed to
-        /// drawText(). nullptr means "use JFLX::SDL3::CONFIG::g_renderer".
+        /// drawText(). nullptr means "use JFLX::config::g_renderer".
         SDL_Renderer* defaultRenderer = nullptr;
 
         /// Ordered list of loaded fonts. The position in this vector is the numeric index.
@@ -87,7 +87,7 @@ namespace JFLX::SDL3 {
 
         /**
          * @brief Default constructor. No per-instance renderer is set; drawing
-         *        uses the globally configured renderer (JFLX::SDL3::CONFIG).
+         *        uses the globally configured renderer (JFLX::config).
          *        Call setDefaultRenderer() to use a different one.
          */
         TextRenderer();
@@ -112,7 +112,7 @@ namespace JFLX::SDL3 {
          *
          * @param renderer The SDL_Renderer* to use as the default. Pass nullptr
          *                 to fall back to the globally configured renderer
-         *                 (JFLX::SDL3::CONFIG::g_renderer).
+         *                 (JFLX::config::g_renderer).
          */
         void setDefaultRenderer(SDL_Renderer* renderer);
 

@@ -2,7 +2,7 @@
 // JFLX_SDL3 — global header of the SDL3 sub-library.
 //
 // Pulls in the central window/renderer configuration first, so every
-// component below can resolve its defaults from JFLX::SDL3::CONFIG.
+// component below can resolve its defaults from JFLX::config.
 //
 
 #ifndef JFLX_SDL3_HPP
