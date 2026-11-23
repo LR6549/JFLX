@@ -11,10 +11,10 @@
 
 int umbrellaSecondTranslationUnit() {
     std::string uppered = "jflx";
-    JFLX::toUpper(uppered);
+    JFLX::strings::toUpper(uppered);
 
     std::vector<int> values {2, 1};
-    JFLX::BubbleSort::sort(values);
+    JFLX::sort::bubbleSort(values);
 
     return (uppered == "JFLX" && values.front() == 1 && values.back() == 2) ? 1 : 0;
 }

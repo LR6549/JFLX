@@ -10,7 +10,7 @@
 
 using json = nlohmann::json;
 
-inline namespace Spotify {
+namespace JFLX {
     class SpotifyWrapper {
     public:
         SpotifyWrapper(const std::string& clientId,

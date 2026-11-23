@@ -14,7 +14,7 @@
 
 #include <vector>
 
-namespace bsa {
+namespace JFLX::math {
 
     /**
      * @brief µ of a Bernoulli chain.

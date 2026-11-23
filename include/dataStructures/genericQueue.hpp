@@ -9,7 +9,7 @@ using namespace std;
 * Principle:
 * - First In First Out -> Fi FO
 */
-namespace genericQueue {
+namespace JFLX {
     template <typename T>
     struct QueueNode {
         T content;

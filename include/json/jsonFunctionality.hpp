@@ -18,7 +18,7 @@
 #include <nlohmann/json.hpp>
 #include <utilities/logging.hpp>
 
-namespace JFLX {
+namespace JFLX::json {
     namespace fs = std::filesystem;
 
     inline std::string path = fs::current_path().string() + "/";
@@ -88,14 +88,14 @@ namespace JFLX {
     inline bool loadJson(const std::string& pathToJson, nlohmann::json& j) {
         std::ifstream loadedFile(pathToJson);
         if (!loadedFile.is_open()) {
-            log("Failed to open ", pathToJson, LOGTYPE::JFLX_ERROR);
+            utilities::log("Failed to open ", pathToJson, utilities::LOGTYPE::JFLX_ERROR);
             return false;
         }
 
         try {
             loadedFile >> j;
         } catch (const nlohmann::json::parse_error& e) {
-            log("Failed to parse JSON: ", pathToJson + ": " + e.what(), LOGTYPE::JFLX_ERROR);
+            utilities::log("Failed to parse JSON: ", pathToJson + ": " + e.what(), utilities::LOGTYPE::JFLX_ERROR);
             return false;
         }
         return true;
@@ -109,13 +109,13 @@ namespace JFLX {
         {
             std::ofstream file(temporaryPath, std::ios::trunc);
             if (!file.is_open()) {
-                log("JSON COULD NOT BE SAVED: ", ("Json file could not be opened located at: " + temporaryPath), LOGTYPE::JFLX_ERROR);
+                utilities::log("JSON COULD NOT BE SAVED: ", ("Json file could not be opened located at: " + temporaryPath), utilities::LOGTYPE::JFLX_ERROR);
                 return false;
             }
 
             file << j.dump(4);
             if (!file.good()) {
-                log("JSON COULD NOT BE SAVED: ", ("Json file could not be written located at: " + temporaryPath), LOGTYPE::JFLX_ERROR);
+                utilities::log("JSON COULD NOT BE SAVED: ", ("Json file could not be written located at: " + temporaryPath), utilities::LOGTYPE::JFLX_ERROR);
                 file.close();
                 std::error_code cleanupError;
                 fs::remove(temporaryPath, cleanupError);
@@ -126,7 +126,7 @@ namespace JFLX {
         std::error_code renameError;
         fs::rename(temporaryPath, pathToJson, renameError);
         if (renameError) {
-            log("JSON COULD NOT BE SAVED: ", ("Json file could not be replaced located at: " + pathToJson), LOGTYPE::JFLX_ERROR);
+            utilities::log("JSON COULD NOT BE SAVED: ", ("Json file could not be replaced located at: " + pathToJson), utilities::LOGTYPE::JFLX_ERROR);
             std::error_code cleanupError;
             fs::remove(temporaryPath, cleanupError);
             return false;
@@ -139,7 +139,7 @@ namespace JFLX {
         try {
             j = nlohmann::json::parse(content);
         } catch (const nlohmann::json::parse_error& e) {
-            log("Failed to parse JSON: ", e.what(), LOGTYPE::JFLX_ERROR);
+            utilities::log("Failed to parse JSON: ", e.what(), utilities::LOGTYPE::JFLX_ERROR);
             return false;
         }
         return true;

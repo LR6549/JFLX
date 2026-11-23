@@ -8,7 +8,6 @@
 #include <dataStructures/vectors.hpp>
 #include <dataStructures/graph.hpp>
 #include <dataStructures/binaryTree.hpp>
-#include <dataStructures/genericDataStructures.hpp>
 #include <dataStructures/genericList.hpp>
 #include <dataStructures/genericQueue.hpp>
 #include <dataStructures/genericStack.hpp>

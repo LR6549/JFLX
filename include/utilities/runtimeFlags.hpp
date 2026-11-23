@@ -5,6 +5,8 @@
 #include <string>
 #include <unordered_map>
 
+namespace JFLX::utilities {
+
 inline std::unordered_map<std::string, bool> flags = {
     {"-d", false},
 };
@@ -33,5 +35,7 @@ inline void toggleFlags(const int argc, char *argv[])
         flags[flag] = true;
     }
 }
+
+} // namespace JFLX::utilities
 
 #endif // JFLX_RUNTIMEFLAGS_HPP

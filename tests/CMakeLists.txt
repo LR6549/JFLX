@@ -4,7 +4,7 @@ target_link_libraries(jflx_link_smoke PRIVATE JFLXLIBS)
 add_test(NAME link_smoke COMMAND jflx_link_smoke)
 
 # ── Each public header must compile and link on its own (self-containment) ──
-foreach(header audio text texture)
+foreach(header audio text texture color)
     add_executable(jflx_header_${header} header_${header}.cpp)
     target_link_libraries(jflx_header_${header} PRIVATE JFLXLIBS)
     add_test(NAME header_${header} COMMAND jflx_header_${header})

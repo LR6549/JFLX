@@ -6,7 +6,7 @@
 
 using namespace std;
 
-namespace bsa{
+namespace JFLX::math{
     
     /*
     * Calculates µ with given n and p:

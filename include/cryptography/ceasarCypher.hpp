@@ -8,7 +8,7 @@
 
 using namespace std;
 
-namespace ceasarCypher {
+namespace JFLX {
     struct CeasarCypher {
 
         CeasarCypher () {

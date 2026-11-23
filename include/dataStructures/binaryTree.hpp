@@ -3,7 +3,7 @@
 
 #include <memory>
 
-namespace binSearchTree
+namespace JFLX
 {
     template <typename T>
     class BinaryTree

@@ -9,7 +9,7 @@
 #include <filesystem>
 namespace fs = std::filesystem;
 
-namespace JFLX {
+namespace JFLX::utilities {
     inline std::string curPath = fs::current_path().string();
 
     inline std::string getCurrentPath() {

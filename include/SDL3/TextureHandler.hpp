@@ -14,7 +14,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace JFLX::SDL3 {
+namespace JFLX {
 
     /**
      * @brief Controls which point of the texture is placed at (x, y).
@@ -58,9 +58,9 @@ namespace JFLX::SDL3 {
         SDL_Renderer* renderer = nullptr;
 
         /// The renderer actually used: the per-instance override when one was
-        /// given, otherwise JFLX::SDL3::CONFIG::g_renderer.
+        /// given, otherwise JFLX::config::g_renderer.
         [[nodiscard]] SDL_Renderer* activeRenderer() const noexcept {
-            return renderer ? renderer : CONFIG::g_renderer;
+            return renderer ? renderer : config::g_renderer;
         }
 
         /// Flat list of loaded textures. The position in this vector is the "layer index".
@@ -73,7 +73,7 @@ namespace JFLX::SDL3 {
 
     public:
         /// Default constructor – draws with the globally configured renderer
-        /// (JFLX::SDL3::CONFIG) unless one is assigned via setRenderer().
+        /// (JFLX::config) unless one is assigned via setRenderer().
         TextureHandler() = default;
 
         /// Preferred constructor: immediately binds a valid renderer, which

@@ -6,7 +6,7 @@
 #include <vector>
 #include <algorithm>
 
-namespace Graph {
+namespace JFLX {
     class Vertex {
         public:
             /*

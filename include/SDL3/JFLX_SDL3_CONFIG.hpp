@@ -16,7 +16,7 @@
 
 #include <SDL3/SDL.h>
 
-namespace JFLX::SDL3::CONFIG {
+namespace JFLX::config {
 
     /// Globally active SDL3 window (borrowed; nullptr while unconfigured).
     extern SDL_Window* g_window;

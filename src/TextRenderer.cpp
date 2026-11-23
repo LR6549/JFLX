@@ -11,15 +11,15 @@
 #include <string>
 #include <utility>
 
-JFLX::SDL3::TextRenderer::TextRenderer() = default;
+JFLX::TextRenderer::TextRenderer() = default;
 
-JFLX::SDL3::TextRenderer::TextRenderer(SDL_Renderer* r) : defaultRenderer(r) {}
+JFLX::TextRenderer::TextRenderer(SDL_Renderer* r) : defaultRenderer(r) {}
 
-JFLX::SDL3::TextRenderer::~TextRenderer() {
+JFLX::TextRenderer::~TextRenderer() {
     cleanUp();
 }
 
-void JFLX::SDL3::TextRenderer::setDefaultRenderer(SDL_Renderer *renderer) {
+void JFLX::TextRenderer::setDefaultRenderer(SDL_Renderer *renderer) {
     if (renderer != defaultRenderer) {
         // Cached textures belong to the renderer they were created on.
         clearTextCache();
@@ -27,22 +27,22 @@ void JFLX::SDL3::TextRenderer::setDefaultRenderer(SDL_Renderer *renderer) {
     defaultRenderer = renderer;
 }
 
-TTF_Font* JFLX::SDL3::TextRenderer::getFont(int index) const {
+TTF_Font* JFLX::TextRenderer::getFont(int index) const {
     if (index < 0 || index >= static_cast<int>(fonts.size())) {
         return nullptr;
     } return fonts[index];
 }
 
-TTF_Font* JFLX::SDL3::TextRenderer::getFont(const std::string& fontName) const {
+TTF_Font* JFLX::TextRenderer::getFont(const std::string& fontName) const {
     if (!fontIndex.contains(fontName)) {
         return nullptr;
     } return fonts[fontIndex.at(fontName)];
 }
 
-void JFLX::SDL3::TextRenderer::loadFont(const std::string& pathToFont, const std::string& fontName) {
+void JFLX::TextRenderer::loadFont(const std::string& pathToFont, const std::string& fontName) {
     TTF_Font* tempFont = TTF_OpenFont(pathToFont.c_str(), 32);
     if (!tempFont) {
-        JFLX::log("Failed to load font ", (pathToFont + ", " + SDL_GetError()), JFLX::LOGTYPE::JFLX_ERROR);
+        JFLX::utilities::log("Failed to load font ", (pathToFont + ", " + SDL_GetError()), JFLX::utilities::LOGTYPE::JFLX_ERROR);
         exit(1);
     }
     int index = static_cast<int>(fonts.size());
@@ -53,9 +53,9 @@ void JFLX::SDL3::TextRenderer::loadFont(const std::string& pathToFont, const std
     }
 }
 
-bool JFLX::SDL3::TextRenderer::measureText(const std::string& text, float fontSize, TTF_Font* font, float& width, float& height) const {
+bool JFLX::TextRenderer::measureText(const std::string& text, float fontSize, TTF_Font* font, float& width, float& height) const {
     if (!font) {
-        JFLX::log("Font is nullptr: ", "", JFLX::LOGTYPE::JFLX_ERROR);
+        JFLX::utilities::log("Font is nullptr: ", "", JFLX::utilities::LOGTYPE::JFLX_ERROR);
         return false;
     }
 
@@ -64,7 +64,7 @@ bool JFLX::SDL3::TextRenderer::measureText(const std::string& text, float fontSi
     int w = 0;
     int h = 0;
     if (!TTF_GetStringSize(font, text.c_str(), text.size(), &w, &h)) {
-        JFLX::log("Failed to measure text: ", SDL_GetError(), JFLX::LOGTYPE::JFLX_ERROR);
+        JFLX::utilities::log("Failed to measure text: ", SDL_GetError(), JFLX::utilities::LOGTYPE::JFLX_ERROR);
         return false;
     }
 
@@ -73,15 +73,15 @@ bool JFLX::SDL3::TextRenderer::measureText(const std::string& text, float fontSi
     return true;
 }
 
-bool JFLX::SDL3::TextRenderer::measureText(const std::string& text, float fontSize, int fontIndex_, float& width, float& height) const {
+bool JFLX::TextRenderer::measureText(const std::string& text, float fontSize, int fontIndex_, float& width, float& height) const {
     return measureText(text, fontSize, getFont(fontIndex_), width, height);
 }
 
-bool JFLX::SDL3::TextRenderer::measureText(const std::string& text, float fontSize, const std::string& fontName, float& width, float& height) const {
+bool JFLX::TextRenderer::measureText(const std::string& text, float fontSize, const std::string& fontName, float& width, float& height) const {
     return measureText(text, fontSize, getFont(fontName), width, height);
 }
 
-bool JFLX::SDL3::TextRenderer::unloadFont(int index) {
+bool JFLX::TextRenderer::unloadFont(int index) {
     if (index < 0 || index >= static_cast<int>(fonts.size())) {
         return false;
     }
@@ -114,7 +114,7 @@ bool JFLX::SDL3::TextRenderer::unloadFont(int index) {
     return true;
 }
 
-bool JFLX::SDL3::TextRenderer::unloadFont(const std::string& fontName) {
+bool JFLX::TextRenderer::unloadFont(const std::string& fontName) {
     const auto it = fontIndex.find(fontName);
     if (it == fontIndex.end()) {
         return false;
@@ -122,7 +122,7 @@ bool JFLX::SDL3::TextRenderer::unloadFont(const std::string& fontName) {
     return unloadFont(it->second);
 }
 
-size_t JFLX::SDL3::TextRenderer::TextCacheKeyHash::operator()(const TextCacheKey& key) const noexcept {
+size_t JFLX::TextRenderer::TextCacheKeyHash::operator()(const TextCacheKey& key) const noexcept {
     const auto voidHash = std::hash<const void*>{};
 
     size_t seed = voidHash(key.renderer);
@@ -141,17 +141,17 @@ size_t JFLX::SDL3::TextRenderer::TextCacheKeyHash::operator()(const TextCacheKey
     return seed;
 }
 
-void JFLX::SDL3::TextRenderer::drawText(const std::string& text, float fontSize, float x, float y, TTF_Font* font, const SDL_Color color, int orientation, bool outline, SDL_Renderer* rRenderer) const {
+void JFLX::TextRenderer::drawText(const std::string& text, float fontSize, float x, float y, TTF_Font* font, const SDL_Color color, int orientation, bool outline, SDL_Renderer* rRenderer) const {
     if (!font) {
-        JFLX::log("Font is nullptr: ", "", JFLX::LOGTYPE::JFLX_ERROR);
+        JFLX::utilities::log("Font is nullptr: ", "", JFLX::utilities::LOGTYPE::JFLX_ERROR);
         return;
     }
 
     SDL_Renderer* renderer = rRenderer ? rRenderer
-                                       : (defaultRenderer ? defaultRenderer : CONFIG::g_renderer);
+                                       : (defaultRenderer ? defaultRenderer : config::g_renderer);
 
     if (!renderer) {
-        JFLX::log("Renderer is nullptr: ", "", JFLX::LOGTYPE::JFLX_ERROR);
+        JFLX::utilities::log("Renderer is nullptr: ", "", JFLX::utilities::LOGTYPE::JFLX_ERROR);
         return;
     }
 
@@ -166,7 +166,7 @@ void JFLX::SDL3::TextRenderer::drawText(const std::string& text, float fontSize,
 
         SDL_Surface* surface = TTF_RenderText_Blended(font, text.c_str(), text.size(), color);
         if (!surface) {
-            JFLX::log("Failed to render text: ", SDL_GetError(), JFLX::LOGTYPE::JFLX_ERROR);
+            JFLX::utilities::log("Failed to render text: ", SDL_GetError(), JFLX::utilities::LOGTYPE::JFLX_ERROR);
             return;
         }
 
@@ -175,7 +175,7 @@ void JFLX::SDL3::TextRenderer::drawText(const std::string& text, float fontSize,
         SDL_DestroySurface(surface);
 
         if (!texture) {
-            JFLX::log("Failed to create text texture: ", SDL_GetError(), JFLX::LOGTYPE::JFLX_ERROR);
+            JFLX::utilities::log("Failed to create text texture: ", SDL_GetError(), JFLX::utilities::LOGTYPE::JFLX_ERROR);
             return;
         }
 
@@ -234,17 +234,17 @@ void JFLX::SDL3::TextRenderer::drawText(const std::string& text, float fontSize,
     SDL_RenderTexture(renderer, cached.text, nullptr, &dstRect);
 }
 
-void JFLX::SDL3::TextRenderer::drawText(const std::string& text, float fontSize, float x, float y, int fontIndex_, const SDL_Color color, int orientation, bool outline, SDL_Renderer* rRenderer) const {
+void JFLX::TextRenderer::drawText(const std::string& text, float fontSize, float x, float y, int fontIndex_, const SDL_Color color, int orientation, bool outline, SDL_Renderer* rRenderer) const {
     TTF_Font* font = getFont(fontIndex_);
-    JFLX::SDL3::TextRenderer::drawText(text, fontSize, x, y, font, color, orientation, outline, rRenderer);
+    JFLX::TextRenderer::drawText(text, fontSize, x, y, font, color, orientation, outline, rRenderer);
 }
 
-void JFLX::SDL3::TextRenderer::drawText(const std::string& text, float fontSize, float x, float y, const std::string& fontName, const SDL_Color color, int orientation, bool outline, SDL_Renderer* rRenderer) const {
+void JFLX::TextRenderer::drawText(const std::string& text, float fontSize, float x, float y, const std::string& fontName, const SDL_Color color, int orientation, bool outline, SDL_Renderer* rRenderer) const {
     TTF_Font* font = getFont(fontName);
-    JFLX::SDL3::TextRenderer::drawText(text, fontSize, x, y, font, color, orientation, outline, rRenderer);
+    JFLX::TextRenderer::drawText(text, fontSize, x, y, font, color, orientation, outline, rRenderer);
 }
 
-void JFLX::SDL3::TextRenderer::clearTextCache() {
+void JFLX::TextRenderer::clearTextCache() {
     for (const auto& entry : textCache) {
         if (entry.second.text) SDL_DestroyTexture(entry.second.text);
         if (entry.second.outline) SDL_DestroyTexture(entry.second.outline);
@@ -252,7 +252,7 @@ void JFLX::SDL3::TextRenderer::clearTextCache() {
     textCache.clear();
 }
 
-void JFLX::SDL3::TextRenderer::cleanUp() {
+void JFLX::TextRenderer::cleanUp() {
     clearTextCache();
 
     defaultRenderer = nullptr;

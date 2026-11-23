@@ -9,7 +9,7 @@
 
 using namespace std;
 
-namespace perlinNoise {
+namespace JFLX::math::noise {
 
     // Function to initialize gradients with a random seed
     void initializeGradients(vector<vector<Gradient>> &gradients, int gridSize, int seed) {

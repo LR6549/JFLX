@@ -4,7 +4,7 @@
 
 #include <SDL3/JFLX_SDL3_CONFIG.hpp>
 
-namespace JFLX::SDL3::CONFIG {
+namespace JFLX::config {
 
     SDL_Window* g_window = nullptr;
     SDL_Renderer* g_renderer = nullptr;

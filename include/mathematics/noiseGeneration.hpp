@@ -3,7 +3,8 @@
 // component (src/noiseGeneration.cpp).
 //
 // The container-based grid variant of the noise generator; a second, header-
-// only implementation lives in <mathematics/perlinNoise.hpp> (namespace JFLX).
+// only implementation lives in <mathematics/perlinNoise.hpp>
+// (namespace JFLX::math::perlin).
 //
 
 #ifndef JFLX_NOISEGENERATION_HPP
@@ -11,7 +12,7 @@
 
 #include <vector>
 
-namespace perlinNoise {
+namespace JFLX::math::noise {
 
     /// Unit gradient vector of a single noise grid cell.
     struct Gradient {

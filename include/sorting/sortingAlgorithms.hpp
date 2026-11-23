@@ -2,21 +2,30 @@
 #define JFLX_SORTINGALGORITHMS
 
 #include <algorithm>
+#include <cstdlib>
+#include <ctime>
 #include <iterator>
 #include <type_traits>
 #include <utility>     // std::swap (qualified calls inside the algorithms)
 
 /*
 * All sorting objects (list, vector, ...) need Idexing Abilities, as well as a default constructor!
+*
+* Every algorithm is exposed as JFLX::sort::<algorithm>Sort(list, inverted = false):
+*   mergeSort, quickSort, selectionSort, insertionSort, gnomeSort,
+*   bubbleSort, heapSort, bogoSort
+* Helpers live in JFLX::sort::detail.
 */
-namespace JFLX {
-    /*
-    *   Stats:
-    *   | Best         | Average      | Worst        | Memory     | Stable     |
-    *   |--------------|--------------|--------------|------------|------------|
-    *   | O(n log(n))  | O(n log(n))  | O(n log(n))  | n          | Yes        |
-    */
-    namespace MergeSort {
+namespace JFLX::sort {
+
+    namespace detail {
+
+        /*
+        *   Stats:
+        *   | Best         | Average      | Worst        | Memory     | Stable     |
+        *   |--------------|--------------|--------------|------------|------------|
+        *   | O(n log(n))  | O(n log(n))  | O(n log(n))  | n          | Yes        |
+        */
         template <typename T>
         T topDownMerge(T leftList, T rightList) {
             T result;
@@ -109,23 +118,12 @@ namespace JFLX {
             return topDownInvertedMerge(leftList, rightList);
         }
 
-        template <typename T>
-        void sort(T& list, bool inverted = false) {
-            if (inverted) {
-                list = topDownInvertedMergeSort(list);
-            } else {
-                list = topDownMergeSort(list);
-            }
-        }
-    }
-
-    /*
-    *   Stats:
-    *   | Best        | Average     | Worst       | Memory     | Stable     |
-    *   |-------------|-------------|-------------|------------|------------|
-    *   | O(n log(n)) | O(n log(n)) | O(n²)       | log(n)     | No         |
-    */
-    namespace QuickSort {
+        /*
+        *   Stats:
+        *   | Best        | Average     | Worst       | Memory     | Stable     |
+        *   |-------------|-------------|-------------|------------|------------|
+        *   | O(n log(n)) | O(n log(n)) | O(n²)       | log(n)     | No         |
+        */
         template <typename T>
         int partition(T& list, int low, int high) {
             auto pivot = list[low];
@@ -189,25 +187,11 @@ namespace JFLX {
                 quickSortInverted(list, p + 1, high);
             }
         }
-        
-        template <typename T>
-        void sort(T& list, bool inverted = false) {
-            int length = list.size();
-            if (inverted) {
-                quickSortInverted(list, 0, length - 1);
-            } else {
-                quickSort(list, 0, length - 1);
-            }
-        }
-    }
 
-    /*
-    *   Stats:
-    *   | Best        | Average     | Worst       | Memory     | Stable     |
-    *   |-------------|-------------|-------------|------------|------------|
-    *   | O(n²)       | O(n²)       | O(n²)       |   1        | No         |
-    */
-    namespace SelectionSort {
+        /*
+        *   Stats:
+        *   | O(n²)       | O(n²)       | O(n²)       |   1        | No         |
+        */
         template <typename T>
         int findSmallest(const T& list, int min, int max) {
             int smallestIndex = min;
@@ -219,145 +203,291 @@ namespace JFLX {
             return smallestIndex;
         }
 
+        /*
+        *   Stats:
+        *   | Best,   Average,    Worst,  Memory,     Stable
+        *   | n log(n), n log(n), n log(n),  1,     No
+        */
         template <typename T>
-        void sort(T& list, bool inverted = false) {
-            int length = list.size();
-            if (inverted) {
-                for (int i = length - 1; i > 0; --i) {
-                    int index = findSmallest(list, 0, i);
-                    std::swap(list[index], list[i]);
+        void heapify(T& list, int n, int i) {
+            int largest = i;
+            int left = 2 * i + 1;
+            int right = 2 * i + 2;
+
+            if (left < n && list[left] > list[largest]) {
+                largest = left;
+            }
+
+            if (right < n && list[right] > list[largest]) {
+                largest = right;
+            }
+
+            if (largest != i) {
+                std::swap(list[i], list[largest]);
+
+                heapify(list, n, largest);
+            }
+        }
+
+        template <typename T>
+        void heapSort(T& list, int length) {
+            for (int i = length / 2 - 1; i >= 0; i--) {
+                heapify(list, length, i);
+            }
+
+            for (int i = length - 1; i > 0; i--) {
+                std::swap(list[0], list[i]);
+
+                heapify(list, i, 0);
+            }
+        }
+
+        template <typename T>
+        void heapifyInverted(T& list, int n, int i) {
+            int smallest = i;
+            int left = 2 * i + 1;
+            int right = 2 * i + 2;
+
+            if (left < n && list[left] < list[smallest]) {
+                smallest = left;
+            }
+
+            if (right < n && list[right] < list[smallest]) {
+                smallest = right;
+            }
+
+            if (smallest != i) {
+                std::swap(list[i], list[smallest]);
+
+                heapifyInverted(list, n, smallest);
+            }
+        }
+
+        template <typename T>
+        void heapSortInverted(T& list, int length) {
+            for (int i = length / 2 - 1; i >= 0; i--) {
+                heapifyInverted(list, length, i);
+            }
+
+            for (int i = length - 1; i > 0; i--) {
+                std::swap(list[0], list[i]);
+
+                heapifyInverted(list, i, 0);
+            }
+        }
+
+        /*
+        *   Stats:
+        *   | Best,   Average,    Worst,  Memory,     Stable
+        *   | n,     nxn!,         n²,     1,          No
+        */
+        template <typename T>
+        bool isSorted(const T& list, int length) {
+            for (int i = 1; i < length; ++i) {
+                if (list[i - 1] > list[i]) {
+                    return false;
                 }
-            } else {
-                for (int i = 0; i < length ; ++i) {
-                    int index = findSmallest(list, i, length - 1);
-                    std::swap(list[index], list[i]);
-                }
+            }
+            return true;
+        }
+
+    } // namespace detail
+
+    /*
+    *   Stats:
+    *   | Best         | Average      | Worst        | Memory     | Stable     |
+    *   |--------------|--------------|--------------|------------|------------|
+    *   | O(n log(n))  | O(n log(n))  | O(n log(n))  | n          | Yes        |
+    */
+    template <typename T>
+    void mergeSort(T& list, bool inverted = false) {
+        if (inverted) {
+            list = detail::topDownInvertedMergeSort(list);
+        } else {
+            list = detail::topDownMergeSort(list);
+        }
+    }
+
+    /*
+    *   Stats:
+    *   | Best        | Average     | Worst       | Memory     | Stable     |
+    *   |-------------|-------------|-------------|------------|------------|
+    *   | O(n log(n)) | O(n log(n)) | O(n²)       | log(n)     | No         |
+    */
+    template <typename T>
+    void quickSort(T& list, bool inverted = false) {
+        int length = list.size();
+        if (inverted) {
+            detail::quickSortInverted(list, 0, length - 1);
+        } else {
+            detail::quickSort(list, 0, length - 1);
+        }
+    }
+
+    /*
+    *   Stats:
+    *   | O(n²)       | O(n²)       | O(n²)       |   1        | No         |
+    */
+    template <typename T>
+    void selectionSort(T& list, bool inverted = false) {
+        int length = list.size();
+        if (inverted) {
+            for (int i = length - 1; i > 0; --i) {
+                int index = detail::findSmallest(list, 0, i);
+                std::swap(list[index], list[i]);
+            }
+        } else {
+            for (int i = 0; i < length ; ++i) {
+                int index = detail::findSmallest(list, i, length - 1);
+                std::swap(list[index], list[i]);
             }
         }
     }
-    
+
     /*
     *   Stats:
     *   | Best        | Average     | Worst       | Memory     | Stable     |
     *   |-------------|-------------|-------------|------------|------------|
     *   | n           | n²          | n²          | 1          | No         |
     */
-    namespace InsertionSort {
-        template <typename T>
-        void sort(T& list, bool inverted = false, bool optimized = false) {
-            int length = list.size();
-            if (inverted) {
-                for (int i = 1; i < length; ++i) {
-                    int j = i;
-                    while (j > 0 && list[j] > list[j - 1]) {
-                        std::swap(list[j], list[j - 1]);
-                        --j;
-                    }
+    template <typename T>
+    void insertionSort(T& list, bool inverted = false, bool optimized = false) {
+        int length = list.size();
+        if (inverted) {
+            for (int i = 1; i < length; ++i) {
+                int j = i;
+                while (j > 0 && list[j] > list[j - 1]) {
+                    std::swap(list[j], list[j - 1]);
+                    --j;
                 }
-            } else {
-                for (int i = 1; i < length; ++i) {
-                    int j = i;
-                    while (j > 0 && list[j] < list[j - 1]) {
-                        std::swap(list[j], list[j - 1]);
-                        --j;
-                    }
+            }
+        } else {
+            for (int i = 1; i < length; ++i) {
+                int j = i;
+                while (j > 0 && list[j] < list[j - 1]) {
+                    std::swap(list[j], list[j - 1]);
+                    --j;
                 }
             }
         }
     }
-    
+
     /*
     *   Stats:
     *   | Best        | Average     | Worst       | Memory     | Stable     |
     *   |-------------|-------------|-------------|------------|------------|
     *   | n           | n²          | n²          | 1          | Yes        |
     */
-    namespace GnomeSort {
-        template <typename T>
-        void sort(T& list, bool inverted = false) {
-            int length = list.size();
-            if (inverted) {
-                int i = length;
-                while(i > 0) {
-                    if (i == length || list[i] <= list[i-1]) {
-                        i --;
-                    } else {
-                        std::swap(list[i], list[i+1]);
-                        i ++;
-                    }
+    template <typename T>
+    void gnomeSort(T& list, bool inverted = false) {
+        int length = list.size();
+        if (inverted) {
+            int i = length;
+            while(i > 0) {
+                if (i == length || list[i] <= list[i-1]) {
+                    i --;
+                } else {
+                    std::swap(list[i], list[i+1]);
+                    i ++;
                 }
-            } else {
-                int i = 0;
-                while(i < length) {
-                    if (i == 0 || list[i] >= list[i-1]) {
-                        i ++;
-                    } else {
-                        std::swap(list[i], list[i-1]);
-                        i --;
-                    }
+            }
+        } else {
+            int i = 0;
+            while(i < length) {
+                if (i == 0 || list[i] >= list[i-1]) {
+                    i ++;
+                } else {
+                    std::swap(list[i], list[i-1]);
+                    i --;
                 }
             }
         }
     }
-    
+
     /*
     *   Stats:
     *   | Best        | Average     | Worst       | Memory     | Stable     |
     *   |-------------|-------------|-------------|------------|------------|
     *   | n²          | n²          | n²          | 1          | No         |
     */
-    namespace BubbleSort {
-        template <typename T>
-        void sort(T& list, bool inverted = false, bool optimized = false) {
-            int length = list.size();
-            bool swapped;
+    template <typename T>
+    void bubbleSort(T& list, bool inverted = false, bool optimized = false) {
+        int length = list.size();
+        bool swapped;
 
-            if (optimized) {
-                if (inverted) {
-                    do {
-                        swapped = false;
-                        for (int i = 0; i < length - 1; ++i) {
-                            if (list[i] < list[i + 1]) {
-                                std::swap(list[i], list[i + 1]);
-                                swapped = true;
-                            }
+        if (optimized) {
+            if (inverted) {
+                do {
+                    swapped = false;
+                    for (int i = 0; i < length - 1; ++i) {
+                        if (list[i] < list[i + 1]) {
+                            std::swap(list[i], list[i + 1]);
+                            swapped = true;
                         }
-                        --length;
-                    } while (swapped);
-                } else {
-                    do {
-                        swapped = false;
-                        for (int i = 0; i < length - 1; ++i) {
-                            if (list[i] > list[i + 1]) {
-                                std::swap(list[i], list[i + 1]);
-                                swapped = true;
-                            }
-                        }
-                        --length;
-                    } while (swapped);
-                }
+                    }
+                    --length;
+                } while (swapped);
             } else {
-                if (inverted) {
-                    do {
-                        swapped = false;
-                        for (int i = 0; i < length - 1; ++i) {
-                            if (list[i] < list[i + 1]) {
-                                std::swap(list[i], list[i + 1]);
-                                swapped = true;
-                            }
+                do {
+                    swapped = false;
+                    for (int i = 0; i < length - 1; ++i) {
+                        if (list[i] > list[i + 1]) {
+                            std::swap(list[i], list[i + 1]);
+                            swapped = true;
                         }
-                    } while (swapped);
-                } else {
-                    do {
-                        swapped = false;
-                        for (int i = 0; i < length - 1; ++i) {
-                            if (list[i] > list[i + 1]) {
-                                std::swap(list[i], list[i + 1]);
-                                swapped = true;
-                            }
+                    }
+                    --length;
+                } while (swapped);
+            }
+        } else {
+            if (inverted) {
+                do {
+                    swapped = false;
+                    for (int i = 0; i < length - 1; ++i) {
+                        if (list[i] < list[i + 1]) {
+                            std::swap(list[i], list[i + 1]);
+                            swapped = true;
                         }
-                    } while (swapped);
-                }
+                    }
+                } while (swapped);
+            } else {
+                do {
+                    swapped = false;
+                    for (int i = 0; i < length - 1; ++i) {
+                        if (list[i] > list[i + 1]) {
+                            std::swap(list[i], list[i + 1]);
+                            swapped = true;
+                        }
+                    }
+                } while (swapped);
+            }
+        }
+    }
+
+    /*
+    * Structure/Container needs Indexing Abilities!
+    */
+    template <typename T>
+    void heapSort(T& list, bool inverted = false) {
+        int length = list.size();
+        if (inverted) {
+            detail::heapSortInverted(list, length);
+        } else {
+            detail::heapSort(list, length);
+        }
+    }
+
+    /*
+    * Structure/Class needs Indexing Abilities!
+    */
+    template <typename T>
+    void bogoSort(T& list) {
+        srand(static_cast<unsigned int>(time(0)));
+        int length = list.size();
+
+        while (!detail::isSorted(list, length)) {
+            for (int i = 0; i < length; ++i) {
+                std::swap(list[i], list[rand() % length]);
             }
         }
     }

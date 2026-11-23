@@ -7,7 +7,7 @@
 
 #define PI 3.14159265358979323846
 
-namespace JFLX {
+namespace JFLX::math::perlin {
     struct Gradient {
         double x, y;
     };

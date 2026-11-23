@@ -1,5 +1,8 @@
 //
 // Mathematics — global header of the mathematics sub-library.
+// Everything lives in JFLX::math; the two perlin-noise variants get their
+// own sub-namespaces (JFLX::math::perlin header-only, JFLX::math::noise
+// compiled).
 //
 
 #ifndef JFLX_MATHEMATICS_HPP
