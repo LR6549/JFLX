@@ -195,7 +195,7 @@ bool JFLX::TextureHandler::unloadTexture(const std::string& name) {
     return unloadTexture(layer);
 }
 
-bool JFLX::TextureHandler::renderTexture(int layer, float x, float y, renderMode mode, float scaleX, float scaleY, double rotation, SDL_FlipMode flip, SDL_Color color) const {
+bool JFLX::TextureHandler::renderTexture(int layer, float x, float y, renderMode mode, float scaleX, float scaleY, double rotation, SDL_FlipMode flip, Color color) const {
     SDL_Renderer* renderer = activeRenderer();
     SDL_Texture* tex = getTexture(layer);
     if (!tex) {
@@ -255,7 +255,7 @@ bool JFLX::TextureHandler::renderTexture(int layer, float x, float y, renderMode
     return true;
 }
 
-bool JFLX::TextureHandler::renderTexture(const std::string& name, float x, float y, renderMode mode, float scaleX, float scaleY, double rotation, SDL_FlipMode flip, SDL_Color color) const {
+bool JFLX::TextureHandler::renderTexture(const std::string& name, float x, float y, renderMode mode, float scaleX, float scaleY, double rotation, SDL_FlipMode flip, Color color) const {
     const int layer = getTextureLayer(name);
     if (layer == -1) {
         JFLX::utilities::log("renderTexture: unknown texture: ", name, JFLX::utilities::LOGTYPE::JFLX_ERROR);

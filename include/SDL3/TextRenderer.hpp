@@ -8,6 +8,7 @@
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
 #include <SDL3/JFLX_SDL3_CONFIG.hpp>
+#include <color/color.hpp>
 
 #include <string>
 #include <unordered_map>
@@ -44,7 +45,7 @@ namespace JFLX {
             SDL_Renderer* renderer = nullptr;
             TTF_Font* font = nullptr;
             int size = 0;
-            SDL_Color color {0, 0, 0, 255};
+            Color color {0, 0, 0, 255};
             bool outline = false;
             std::string text;
 
@@ -212,7 +213,9 @@ namespace JFLX {
          * @param x           Horizontal anchor position in screen/renderer coordinates.
          * @param y           Vertical position of the top edge of the text.
          * @param font        Pointer to the TTF_Font to use.
-         * @param color       RGBA fill colour of the text (default: opaque black).
+         * @param color       RGBA fill colour of the text as JFLX::Color
+         *                    (default: opaque black). An SDL_Color converts
+         *                    implicitly.
          * @param orientation Horizontal anchor mode relative to @p x:
          *                      -1 → right-aligned  (text ends   at x)
          *                       0 → centred         (text centred on x)
@@ -223,7 +226,7 @@ namespace JFLX {
          */
         void drawText(const std::string &text, float fontSize, float x, float y,
                       TTF_Font* font,
-                      SDL_Color color = {0, 0, 0, 255},
+                      Color color = {0, 0, 0, 255},
                       int orientation = 1,
                       bool outline = false,
                       SDL_Renderer *rRenderer = nullptr) const;
@@ -235,7 +238,7 @@ namespace JFLX {
          */
         void drawText(const std::string &text, float fontSize, float x, float y,
                       int fontIndex_,
-                      SDL_Color color = {0, 0, 0, 255},
+                      Color color = {0, 0, 0, 255},
                       int orientation = 1,
                       bool outline = false,
                       SDL_Renderer *rRenderer = nullptr) const;
@@ -247,7 +250,7 @@ namespace JFLX {
          */
         void drawText(const std::string &text, float fontSize, float x, float y,
                       const std::string &fontName,
-                      SDL_Color color = {0, 0, 0, 255},
+                      Color color = {0, 0, 0, 255},
                       int orientation = 1,
                       bool outline = false,
                       SDL_Renderer *rRenderer = nullptr) const;

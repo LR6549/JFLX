@@ -9,6 +9,7 @@
 
 #include <SDL3/SDL.h>
 #include <SDL3/JFLX_SDL3_CONFIG.hpp>
+#include <color/color.hpp>
 
 #include <string>
 #include <unordered_map>
@@ -195,7 +196,8 @@ namespace JFLX {
          * @param rotation  Clockwise rotation in degrees around the anchor point.
          * @param flip      SDL_FLIP_NONE / SDL_FLIP_HORIZONTAL / SDL_FLIP_VERTICAL.
          * @param color     Colour & alpha modulation applied before rendering
-         *                  (white + full alpha = no modulation).
+         *                  as JFLX::Color (white + full alpha = no modulation;
+         *                  an SDL_Color converts implicitly).
          * @return true on success, false if the layer is invalid or rendering fails.
          */
         bool renderTexture(int layer,
@@ -205,7 +207,7 @@ namespace JFLX {
                            float scaleY         = 1.f,
                            double rotation      = 0.0,
                            SDL_FlipMode flip    = SDL_FLIP_NONE,
-                           SDL_Color color      = {255, 255, 255, 255}) const;
+                           Color color          = {255, 255, 255, 255}) const;
 
         /**
          * @brief Renders the texture identified by name (convenience overload).
@@ -223,7 +225,7 @@ namespace JFLX {
                            float scaleY         = 1.f,
                            double rotation      = 0.0,
                            SDL_FlipMode flip    = SDL_FLIP_NONE,
-                           SDL_Color color      = {255, 255, 255, 255}) const;
+                           Color color          = {255, 255, 255, 255}) const;
 
         /**
          * @brief Destroys all loaded textures and clears the internal containers.

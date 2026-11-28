@@ -2,7 +2,8 @@
 // Color — global header of the color sub-library.
 //
 // JFLX::Color is a plain RGBA color (8 bits per channel) that can be built
-// from channel values or from a hex string. The free functions in
+// from channel values, from a hex string, or implicitly from any byte-RGBA
+// struct with .r/.g/.b/.a members (e.g. SDL_Color). The free functions in
 // JFLX::color convert between hex strings ("#rrggbb") and RGB(A) values.
 //
 // Accepted hex forms (leading '#' optional, any case):
@@ -15,6 +16,7 @@
 #define JFLX_COLOR_HPP
 
 #include <cmath>
+#include <concepts>
 #include <cstdint>
 #include <stdexcept>
 #include <string>
@@ -54,8 +56,9 @@ namespace JFLX {
         Color blendPercent(const Color& a, const Color& b, double percent);
     } // namespace color
 
-    //* An RGBA color, 8 bits per channel. Constructible from channel values
-    //* or from a hex string; toHex() converts back to a hex string.
+    //* An RGBA color, 8 bits per channel. Constructible from channel values,
+    //* from a hex string, or from any byte-RGBA struct with .r/.g/.b/.a
+    //* members (e.g. SDL_Color); toHex() converts back to a hex string.
     struct Color {
         std::uint8_t r = 0;
         std::uint8_t g = 0;
@@ -72,6 +75,19 @@ namespace JFLX {
         //* malformed input.
         explicit Color(std::string_view hex)
             : Color(color::hexToRgb(hex)) {}
+
+        //* Implicitly converts from any struct with public .r/.g/.b/.a members
+        //* of a one-byte integral type (e.g. SDL_Color), so a JFLX::Color can
+        //* be passed wherever such structs are accepted.
+        template <typename T>
+            requires requires(const T& other) {
+                requires std::integral<decltype(other.r)> && sizeof(other.r) == 1;
+                requires std::integral<decltype(other.g)> && sizeof(other.g) == 1;
+                requires std::integral<decltype(other.b)> && sizeof(other.b) == 1;
+                requires std::integral<decltype(other.a)> && sizeof(other.a) == 1;
+            }
+        constexpr Color(const T& other)
+            : r(other.r), g(other.g), b(other.b), a(other.a) {}
 
         //* "#rrggbb", or "#rrggbbaa" when includeAlpha is set.
         std::string toHex(bool includeAlpha = false) const {

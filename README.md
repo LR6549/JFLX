@@ -47,8 +47,8 @@ grouped free functions sit in their sub-library namespace.
 |---|---|---|
 | `jflx_sdl3_config` | `<SDL3/JFLX_SDL3_CONFIG.hpp>` | Global window/renderer configuration: `JFLX::config::g_window`/`g_renderer` plus `setWindow()`/`setRenderer()`. |
 | `jflx_sdl3_audio` | `<SDL3/AudioHandler.hpp>` | Loads and plays sounds/music via SDL3_mixer. Sounds overlap freely on one mixer; music plays on a dedicated track with a true fade-out-then-fade-in transition (completed via the track-stopped callback). Master gain control (`setSoundVolume`/`setMusicVolume` + getters), `pauseMusic`/`resumeMusic`, and per-asset `unloadSound`/`unloadMusic`. Assets live in `<root>/sounds/` (sounds) and `<root>/data/music/` (music), keyed by filename stem. Supports `.mp3`, `.ogg`, `.wav`, `.flac`. |
-| `jflx_sdl3_text` | `<SDL3/TextRenderer.hpp>` | Loads TTF fonts and draws UTF-8 text onto an `SDL_Renderer` (by font pointer, index, or name), with optional 8-direction outline. `measureText()` reports the pixel size of a string without rendering. Rendered text textures are cached and reused across frames; `unloadFont()` removes a single font (with cache/index upkeep). |
-| `jflx_sdl3_texture` | `<SDL3/TextureHandler.hpp>` | Loads image folders as named/indexed texture layers, slices tilesheets into individual tiles (`loadTileset`), renders with anchor modes, rotation, flip, and colour modulation, and removes single textures via `unloadTexture()` (layer indices re-map automatically). |
+| `jflx_sdl3_text` | `<SDL3/TextRenderer.hpp>` | Loads TTF fonts and draws UTF-8 text onto an `SDL_Renderer` (by font pointer, index, or name), with optional 8-direction outline. The text colour is a `JFLX::Color` (an `SDL_Color` converts implicitly). `measureText()` reports the pixel size of a string without rendering. Rendered text textures are cached and reused across frames; `unloadFont()` removes a single font (with cache/index upkeep). |
+| `jflx_sdl3_texture` | `<SDL3/TextureHandler.hpp>` | Loads image folders as named/indexed texture layers, slices tilesheets into individual tiles (`loadTileset`), renders with anchor modes, rotation, flip, and colour modulation (`JFLX::Color`, an `SDL_Color` converts implicitly), and removes single textures via `unloadTexture()` (layer indices re-map automatically). |
 | `jflx_math_noise_generation` | `<mathematics/noiseGeneration.hpp>` | Perlin noise over a random gradient grid (namespace `JFLX::math::noise`): grid initialisation, `fade`/`lerp` interpolation, and the scalar and `noiseMap` variants. |
 | `jflx_math_bsa` | `<mathematics/bsa.hpp>` | Binomial statistics (namespace `JFLX::math`): µ, sigma from *n/p* or from a known µ, k-sigma intervals, factorial/binomial coefficient, hit chances. |
 
@@ -59,7 +59,7 @@ grouped free functions sit in their sub-library namespace.
 | `sorting` | `<sorting/sorting.hpp>` | `sortingAlgorithms` — all algorithms under `JFLX::sort` (`mergeSort`, `quickSort`, `selectionSort`, `insertionSort`, `gnomeSort`, `bubbleSort`, `heapSort`, `bogoSort`), helpers in `JFLX::sort::detail` |
 | `dataStructures` | `<dataStructures/dataStructures.hpp>` | `vectors` (`JFLX::Vector2`), `graph` (`JFLX::Vertex`/`Edge`/`Graph`), `binaryTree` (`JFLX::BinaryTree`), `genericList`/`genericQueue`/`genericStack` (`JFLX::List`/`Queue`/`Stack`) |
 | `mathematics` | `<mathematics/mathematics.hpp>` | `primeNumbers`, `perlinNoise` (header-only, `JFLX::math::perlin`; the noise-generation and `bsa` components above are compiled into `JFLX::math`) |
-| `color` | `<color/color.hpp>` | `Color` (`JFLX::Color`, `.r`/`.g`/`.b`/`.a`, from hex or RGB) + `JFLX::color::hexToRgb`/`rgbToHex`, `blend`/`blendPercent` (linear interpolation between two colors) |
+| `color` | `<color/color.hpp>` | `Color` (`JFLX::Color`, `.r`/`.g`/`.b`/`.a`, from hex or RGB; also implicitly from byte-RGBA structs like `SDL_Color`) + `JFLX::color::hexToRgb`/`rgbToHex`, `blend`/`blendPercent` (linear interpolation between two colors) |
 | `cryptography` | `<cryptography/cryptography.hpp>` | `ceasarCypher` (`JFLX::CeasarCypher`) |
 | `positioning` | `<positioning/positioning.hpp>` | `IFOV` — `JFLX::positioning::isInFOV` over `JFLX::Vector2` |
 | `strings` | `<strings/strings.hpp>` | `stringManipulation` (`JFLX::strings::toLower`/`toUpper`) |
@@ -322,6 +322,10 @@ package (`find_package(JFLXLIBS)`) under `<prefix>`.
   from `#RGB`/`#RGBA`/`#RRGGBB`/`#RRGGBBAA` or channel values) plus
   `JFLX::color::hexToRgb`/`rgbToHex`; malformed hex throws
   `std::invalid_argument`.
+- `JFLX::Color` interoperates with `SDL_Color`: it is implicitly constructible
+  from any byte-RGBA struct, and the `drawText()`/`renderTexture()` colour
+  parameters are now `JFLX::Color` — existing `SDL_Color` (and braced-list)
+  arguments keep working unchanged.
 - `JFLX::color::blend(a, b, amount)` / `JFLX::color::blendPercent(a, b, percent)`
   — linear per-channel interpolation (alpha included) returning a new
   `JFLX::Color`; the degree is given as 0.0–1.0 resp. 0–100 and clamped.

@@ -141,7 +141,7 @@ size_t JFLX::TextRenderer::TextCacheKeyHash::operator()(const TextCacheKey& key)
     return seed;
 }
 
-void JFLX::TextRenderer::drawText(const std::string& text, float fontSize, float x, float y, TTF_Font* font, const SDL_Color color, int orientation, bool outline, SDL_Renderer* rRenderer) const {
+void JFLX::TextRenderer::drawText(const std::string& text, float fontSize, float x, float y, TTF_Font* font, const Color color, int orientation, bool outline, SDL_Renderer* rRenderer) const {
     if (!font) {
         JFLX::utilities::log("Font is nullptr: ", "", JFLX::utilities::LOGTYPE::JFLX_ERROR);
         return;
@@ -164,7 +164,7 @@ void JFLX::TextRenderer::drawText(const std::string& text, float fontSize, float
         // this texture instead of re-rendering and re-uploading it.
         TTF_SetFontSize(font, pxSize);
 
-        SDL_Surface* surface = TTF_RenderText_Blended(font, text.c_str(), text.size(), color);
+        SDL_Surface* surface = TTF_RenderText_Blended(font, text.c_str(), text.size(), SDL_Color {color.r, color.g, color.b, color.a});
         if (!surface) {
             JFLX::utilities::log("Failed to render text: ", SDL_GetError(), JFLX::utilities::LOGTYPE::JFLX_ERROR);
             return;
@@ -234,12 +234,12 @@ void JFLX::TextRenderer::drawText(const std::string& text, float fontSize, float
     SDL_RenderTexture(renderer, cached.text, nullptr, &dstRect);
 }
 
-void JFLX::TextRenderer::drawText(const std::string& text, float fontSize, float x, float y, int fontIndex_, const SDL_Color color, int orientation, bool outline, SDL_Renderer* rRenderer) const {
+void JFLX::TextRenderer::drawText(const std::string& text, float fontSize, float x, float y, int fontIndex_, const Color color, int orientation, bool outline, SDL_Renderer* rRenderer) const {
     TTF_Font* font = getFont(fontIndex_);
     JFLX::TextRenderer::drawText(text, fontSize, x, y, font, color, orientation, outline, rRenderer);
 }
 
-void JFLX::TextRenderer::drawText(const std::string& text, float fontSize, float x, float y, const std::string& fontName, const SDL_Color color, int orientation, bool outline, SDL_Renderer* rRenderer) const {
+void JFLX::TextRenderer::drawText(const std::string& text, float fontSize, float x, float y, const std::string& fontName, const Color color, int orientation, bool outline, SDL_Renderer* rRenderer) const {
     TTF_Font* font = getFont(fontName);
     JFLX::TextRenderer::drawText(text, fontSize, x, y, font, color, orientation, outline, rRenderer);
 }
